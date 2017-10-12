@@ -19,6 +19,6 @@ void board_init(void)
 	 * specific board configuration, found in conf_board.h.
 	 */
 	
-	ioport_init()
+	ioport_init();
 	
 }

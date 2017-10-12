@@ -52,21 +52,9 @@
  * running the ASF driver selector tool. Any changes will be discarded.
  */
 
-// From module: ADC - Analog-to-digital Converter
-#include <adc.h>
-
 // From module: Common SAM compiler driver
 #include <compiler.h>
 #include <status_codes.h>
-
-// From module: Common build items for user board support templates
-#include <user_board.h>
-
-// From module: DACC - Digital-to-Analog Converter
-#include <dacc.h>
-
-// From module: Delay routines
-#include <delay.h>
 
 // From module: GPIO - General purpose Input/Output
 #include <gpio.h>
@@ -90,14 +78,14 @@
 // From module: Part identification macros
 #include <parts.h>
 
-// From module: RTC - Real Time Clock
-#include <rtc.h>
+// From module: SAM4S Xplained Pro LED support enabled
+#include <led.h>
 
 // From module: System Clock Control - SAM4S implementation
 #include <sysclk.h>
 
-// From module: TC - Timer Counter
-#include <tc.h>
+// From module: WDT - Watchdog Timer
+#include <wdt.h>
 
 // From module: pio_handler support enabled
 #include <pio_handler.h>
