@@ -47,6 +47,10 @@
 #ifndef CONF_BOARD_H_INCLUDED
 #define CONF_BOARD_H_INCLUDED
 
+/* Clock */
+
+
+
 /** Enable Com Port. */
 #define CONF_BOARD_UART_CONSOLE
 
@@ -81,6 +85,7 @@
 // ---------- Fan Management ----------
 #define PIN_RPM1 PIO_PA0_IDX
 #define PIN_RMP2 PIO_PA1_IDX
+#define PIN_FAN	 PIO_PA2_IDX
 
 // ---------- I2C ----------
 #define I2C1SDA PIO_PA3_IDX
@@ -93,6 +98,7 @@
 
 #define PIN_LEDK7 PIO_PA23_IDX
 #define PIN_LEDK8 PIO_PA24_IDX
+#define PIN_LEDTB PIO_PC23_IDX
 
 #define IMX_INT4 PIO_PA25_IDX
 #define IMX_INT5 PIO_PA26_IDX
@@ -126,7 +132,7 @@
 #define ADC_3V3 ADC_CHANNEL_8
 #define ADC_5V	ADC_CHANNEL_9
 
-#define ADC_INT_TEMP	ADC_CHANNEL_15
+#define ADC_INT_TEMP	ADC_TEMPERATURE_SENSOR
 
 
 #endif /* CONF_BOARD_H_INCLUDED */

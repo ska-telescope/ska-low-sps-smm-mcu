@@ -52,6 +52,9 @@
  * running the ASF driver selector tool. Any changes will be discarded.
  */
 
+// From module: ACC - Analog Comparator Controller
+#include <acc.h>
+
 // From module: ADC - Analog-to-digital Converter
 #include <adc.h>
 
@@ -98,6 +101,15 @@
 
 // From module: TC - Timer Counter
 #include <tc.h>
+
+// From module: TWI - Two-Wire Interface - SAM implementation
+#include <sam_twi/twi_master.h>
+#include <sam_twi/twi_slave.h>
+#include <twi_master.h>
+#include <twi_slave.h>
+
+// From module: TWI - Two-wire Interface
+#include <twi.h>
 
 // From module: pio_handler support enabled
 #include <pio_handler.h>

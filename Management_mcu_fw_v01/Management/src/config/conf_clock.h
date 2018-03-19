@@ -60,8 +60,8 @@
 //#define CONFIG_SYSCLK_SOURCE        SYSCLK_SRC_PLLBCK
 
 // ===== System Clock (MCK) Prescaler Options   (Fmck = Fsys / (SYSCLK_PRES))
-//#define CONFIG_SYSCLK_PRES          SYSCLK_PRES_1
-#define CONFIG_SYSCLK_PRES          SYSCLK_PRES_2
+#define CONFIG_SYSCLK_PRES          SYSCLK_PRES_1
+//#define CONFIG_SYSCLK_PRES          SYSCLK_PRES_2
 //#define CONFIG_SYSCLK_PRES          SYSCLK_PRES_4
 //#define CONFIG_SYSCLK_PRES          SYSCLK_PRES_8
 //#define CONFIG_SYSCLK_PRES          SYSCLK_PRES_16
@@ -72,7 +72,7 @@
 // ===== PLL0 (A) Options   (Fpll = (Fclk * PLL_mul) / PLL_div)
 // Use mul and div effective values here.
 #define CONFIG_PLL0_SOURCE          PLL_SRC_MAINCK_XTAL
-#define CONFIG_PLL0_MUL             20
+#define CONFIG_PLL0_MUL             (120000000UL / BOARD_FREQ_MAINCK_XTAL)
 #define CONFIG_PLL0_DIV             1
 
 // ===== PLL1 (B) Options   (Fpll = (Fclk * PLL_mul) / PLL_div)
@@ -100,6 +100,10 @@
 // - USB clock divider: 2 (divided by 2)
 // - PLLB output: XTAL * 16 / 2
 // - USB clock: 12 * 16 / 2 / 2 = 48MHz
+
+// === ADC ===
+#define ADC_CLOCK   6400000
+
 
 
 #endif /* CONF_CLOCK_H_INCLUDED */
