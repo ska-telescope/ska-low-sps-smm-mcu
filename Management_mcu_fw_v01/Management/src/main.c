@@ -33,11 +33,23 @@ static void configure_adc(void)
 	adc_configure_trigger(ADC, ADC_TRIG_SW, 1);
 }
 
+void readADC(void)
+{
+	uint16_t adc_value;
+	uint16_t normalized_adc_value;
+	// Test ADC
+	//adc_val = adc_get_channel_value(ADC, ADC_CHANNEL_0);
+			
+	uint16_t adc_value = 0;
+	for(int i=0; i<10; i++)
+	adc_value += adc_get_channel_value(ADC, ADC_CHANNEL_0);
+	adc_value /= 10;
+	//normalize
+	normalized_adc_value = (adc_value * 1000) / 4096;
+}
 
 int main (void)
 {
-	uint32_t adc_value;
-	uint32_t normalized_adc_value;
 	/* Insert system clock initialization code here (sysclk_init()). */
 	sysclk_init();
 	board_init();
@@ -53,16 +65,7 @@ int main (void)
 	while (1) {
 		ioport_toggle_pin_level(PIN_LEDTB);
 		
-		// Test ADC
-		//adc_val = adc_get_channel_value(ADC, ADC_CHANNEL_0);
-		
-		uint32_t adc_value = 0;
-		uint32_t i = 0;
-		for( i=0; i<10; i++)
-		adc_value += adc_get_channel_value(ADC, ADC_CHANNEL_0);
-		adc_value /= 10;
-		//normalize
-		normalized_adc_value = (adc_value * 1000) / 4096;
+		readADC();
 		
 		//delay_ms(1000);
 		
