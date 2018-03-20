@@ -1,6 +1,12 @@
 /*
- * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
+ * Sanitas EG - SKA Management Board
+ * 
+ * V1.0 - 20/03/18 ~ Luca Schettini
+ * 
+ * Copyright (c) 2017 Sanitas EG srl.  All right reserved.
+ * 
  */
+
 #include <asf.h>
 
 float voltages[12] = { 0 };	
