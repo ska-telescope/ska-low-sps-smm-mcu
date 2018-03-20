@@ -3,8 +3,7 @@
  */
 #include <asf.h>
 
-float voltages[12] = { 0 };
-	
+float voltages[12] = { 0 };	
 const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0.9763, 0.4395, 0.9763, 1.4793, 0.8766, 0.8284 };
 
 static void configure_adc(void)
@@ -24,7 +23,7 @@ static void configure_adc(void)
 		ADC_3V,
 		ADC_2V8
 		};
-	/* Configure ADC pin for light sensor. */
+	/* Configure ADC pin */
 	gpio_configure_pin(PIO_PB0_IDX, PIO_INPUT);
 	
 	/* Enable ADC clock. */
@@ -32,9 +31,9 @@ static void configure_adc(void)
 	
 	/* Configure ADC. */
 	adc_init(ADC, sysclk_get_cpu_hz(), 1000000, ADC_MR_STARTUP_SUT0);
-	//adc_enable_channel(ADC, ADC_CHANNEL_0);
-	for (int i = 0; i < 12; i++) {
+	for (int i = 0; i < 13; i++) {
 		adc_enable_channel(ADC, (enum adc_channel_num_t)i);
+		if (i == 9) i++;
 	}
 	adc_configure_trigger(ADC, ADC_TRIG_SW, 1);
 }
@@ -47,15 +46,18 @@ void readADC(void)
 	//adc_val = adc_get_channel_value(ADC, ADC_CHANNEL_0);
 	
 	
-	for(int y=0; y < 12; y++)
+	for(int y=0; y < 13; y++)
 	{	
+		volatile int x = 0;
 		adc_value = 0;
 		for(int i=0; i < 10; i++)
 		adc_value += adc_get_channel_value(ADC,  (enum adc_channel_num_t)y);
 		adc_value /= 10;
 		//normalize
 		//normalized_adc_value = (adc_value * 1000) / 4096; // Da sistemare in base al partitore
-		voltages[y] = (adc_value * voltagesMot[y]);
+		voltages[x] = (adc_value * voltagesMot[y]);
+		if (y == 9) y++;
+		x++;
 	}
 	int b = 0;
 	return;
@@ -63,7 +65,7 @@ void readADC(void)
 
 int main (void)
 {
-	/* Insert system clock initialization code here (sysclk_init()). */
+	/* Insert system clock initialization code here*/
 	sysclk_init();
 	board_init();
 	
@@ -76,8 +78,7 @@ int main (void)
 	
 	/* Insert application code here, after the board has been initialized. */
 	while (1) {
-		ioport_toggle_pin_level(PIN_LEDTB);
-		
+		//ioport_toggle_pin_level(PIN_LEDTB);		
 		readADC();
 		
 		//delay_ms(1000);

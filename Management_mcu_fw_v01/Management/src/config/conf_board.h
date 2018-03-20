@@ -94,7 +94,7 @@
 #define I2C1SCL (PIO_PERIPH_A | PIO_DEFAULT)
 
 // ---------- GPIO ----------
-#define XO3_REFRESH PIO_PA6_IDX
+//#define XO3_REFRESH PIO_PA6_IDX
 
 #define PIN_LEDK7 PIO_PA23_IDX
 #define PIN_LEDK8 PIO_PA24_IDX
