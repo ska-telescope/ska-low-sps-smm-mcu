@@ -17,18 +17,18 @@ static void configure_adc(void)
 {
 	/* List ADC Channel*/
 	enum adc_channel_num_t ch_list[12] = {
-		ADC_SOC,
-		ADC_ARM,
-		ADC_DDR,
-		ADC_2V5,
-		ADC_1V0,
-		ADC_1V1,
-		ADC_VCORE, 
-		ADC_1V5, 
-		ADC_3V3, 
-		ADC_5V,
-		ADC_3V,
-		ADC_2V8
+		ADC_SOC,	// 1360
+		ADC_ARM,	// 1360
+		ADC_DDR,	// 1350
+		ADC_2V5,	// 2500
+		ADC_1V0,	// 1000
+		ADC_1V1,	// 1100
+		ADC_VCORE,  // 1200
+		ADC_1V5,    // 1500
+		ADC_3V3,	// 3300
+		ADC_5V,		// 5000
+		ADC_3V,		// 3000
+		ADC_2V8		// 2800
 		};
 	/* Configure ADC pin */
 	gpio_configure_pin(PIO_PB0_IDX, PIO_INPUT);
@@ -47,26 +47,24 @@ static void configure_adc(void)
 
 void readADC(void)
 {
-	uint32_t adc_value;
+	float adc_value;
 	uint32_t normalized_adc_value;
 	// Test ADC
 	//adc_val = adc_get_channel_value(ADC, ADC_CHANNEL_0);
 	
-	
+	int x = 0;
 	for(int y=0; y < 13; y++)
 	{	
-		volatile int x = 0;
+		if (y == 10) y++;
 		adc_value = 0;
 		for(int i=0; i < 10; i++)
 		adc_value += adc_get_channel_value(ADC,  (enum adc_channel_num_t)y);
 		adc_value /= 10;
 		//normalize
 		//normalized_adc_value = (adc_value * 1000) / 4096; // Da sistemare in base al partitore
-		voltages[x] = (adc_value * voltagesMot[y]);
-		if (y == 9) y++;
+		voltages[x] = (adc_value * voltagesMot[x]);
 		x++;
 	}
-	int b = 0;
 	return;
 }
 
