@@ -17,11 +17,11 @@
 #include <memory>
 #include <string.h>
 
-#include "MLC150.h"
+//#include "MLC150.h"
 #include "SpiRouter.h"
 
-#include "Arduino.h"
-#include <SPI.h>
+//#include "Arduino.h"
+//#include <SPI.h>
 
 
 int
