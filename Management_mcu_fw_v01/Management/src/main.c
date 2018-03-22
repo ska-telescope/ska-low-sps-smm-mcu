@@ -112,11 +112,12 @@ int main (void)
 	configure_adc();
 	//start ADC
 	adc_start(ADC);
+	
 	/* Insert application code here, after the board has been initialized. */
 	while (1) {
 		//ioport_toggle_pin_level(PIN_LEDTB);		
 		readADC();
-		
+			
 		//delay_ms(1000);
 		
 	}

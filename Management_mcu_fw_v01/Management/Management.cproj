@@ -617,6 +617,9 @@
     <None Include="src\ASF\sam\drivers\spi\spi.h">
       <SubType>compile</SubType>
     </None>
+    <Compile Include="src\regfile.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\SpiRouter.h">
       <SubType>compile</SubType>
     </Compile>

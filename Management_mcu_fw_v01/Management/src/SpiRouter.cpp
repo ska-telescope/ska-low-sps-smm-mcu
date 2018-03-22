@@ -19,6 +19,7 @@
 
 //#include "MLC150.h"
 #include "SpiRouter.h"
+#include "regfile.h"
 
 //#include "Arduino.h"
 //#include <SPI.h>
