@@ -11,40 +11,9 @@
 
 float voltages[12] = { 0 };	
 const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0.9763, 0.4395, 0.9763, 1.4793, 0.8766, 0.8284 };
+float buck2temp = 0;
 
 /* ----------------------------------------- ADC SP Start --- */
-static void configure_adc(void)
-{
-	/* List ADC Channel*/
-	enum adc_channel_num_t ch_list[12] = {
-		ADC_SOC,	// 1360
-		ADC_ARM,	// 1360
-		ADC_DDR,	// 1350
-		ADC_2V5,	// 2500
-		ADC_1V0,	// 1000
-		ADC_1V1,	// 1100
-		ADC_VCORE,  // 1200
-		ADC_1V5,    // 1500
-		ADC_3V3,	// 3300
-		ADC_5V,		// 5000
-		ADC_3V,		// 3000
-		ADC_2V8		// 2800
-		};
-	/* Configure ADC pin */
-	gpio_configure_pin(PIO_PB0_IDX, PIO_INPUT);
-	
-	/* Enable ADC clock. */
-	pmc_enable_periph_clk(ID_ADC);
-	
-	/* Configure ADC. */
-	adc_init(ADC, sysclk_get_cpu_hz(), 1000000, ADC_MR_STARTUP_SUT0);
-	for (int i = 0; i < 13; i++) {
-		adc_enable_channel(ADC, (enum adc_channel_num_t)i);
-		if (i == 9) i++;
-	}
-	adc_configure_trigger(ADC, ADC_TRIG_SW, 1);
-}
-
 void readADC(void)
 {
 	float adc_value;
@@ -53,7 +22,7 @@ void readADC(void)
 	//adc_val = adc_get_channel_value(ADC, ADC_CHANNEL_0);
 	
 	int x = 0;
-	for(int y=0; y < 13; y++)
+	for(int y=0; y < 13; y++) // Voltages
 	{	
 		if (y == 10) y++;
 		adc_value = 0;
@@ -65,6 +34,8 @@ void readADC(void)
 		voltages[x] = (adc_value * voltagesMot[x]);
 		x++;
 	}
+	buck2temp += adc_get_channel_value(ADC, ADC_BUCK2TEMP); // Temp Buck 2
+	buck2temp = ((buck2temp * 0.4395) + 19) / 6.75;
 	return;
 }
 
@@ -105,19 +76,15 @@ int main (void)
 	/* Insert system clock initialization code here*/
 	sysclk_init();
 	board_init();
-	
-	//uint32_t adc_val;
-	
-	//Configure ADC
-	configure_adc();
-	//start ADC
+
 	adc_start(ADC);
 	
 	/* Insert application code here, after the board has been initialized. */
+
 	while (1) {
 		//ioport_toggle_pin_level(PIN_LEDTB);		
 		readADC();
-			
+
 		//delay_ms(1000);
 		
 	}
