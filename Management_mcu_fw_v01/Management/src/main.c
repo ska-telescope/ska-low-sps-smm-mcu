@@ -78,7 +78,6 @@ int main (void)
 	board_init();
 
 	adc_start(ADC);
-	
 	/* Insert application code here, after the board has been initialized. */
 
 	while (1) {

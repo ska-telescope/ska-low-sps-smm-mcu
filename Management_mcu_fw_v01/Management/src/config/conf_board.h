@@ -96,9 +96,9 @@
 // ---------- GPIO ----------
 #define XO3_REFRESH PIO_PA6_IDX
 
-#define PIN_LEDK7 PIO_PA24_IDX
-#define PIN_LEDK8 PIO_PA25_IDX
+
 #define PIN_LEDTB PIO_PC23_IDX
+
 
 //#define IMX_INT4 PIO_PA25_IDX
 //#define IMX_INT5 PIO_PA26_IDX

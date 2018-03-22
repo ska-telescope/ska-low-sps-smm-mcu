@@ -59,6 +59,8 @@ void board_init(void)
 	ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_LOW);
 	ioport_set_pin_dir(PIN_LEDK8, IOPORT_DIR_OUTPUT); // Led Blue
 	ioport_set_pin_level(PIN_LEDK8, IOPORT_PIN_LEVEL_LOW);
+	ioport_set_pin_dir(PIN_LEDTB, IOPORT_DIR_OUTPUT); // Led DemoBoard
+	ioport_set_pin_level(PIN_LEDTB, IOPORT_PIN_LEVEL_HIGH);
 	
 	// Configure GPIO
 	//ioport_set_pin_dir(XO3_REFRESH, IOPORT_DIR_OUTPUT); // Pin XO3_REFRESH - Temp Disabled
