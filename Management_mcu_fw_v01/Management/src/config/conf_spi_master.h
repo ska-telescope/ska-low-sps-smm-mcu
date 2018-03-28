@@ -64,4 +64,7 @@
 //! Default Config Spi Master Dummy Field
 #define CONFIG_SPI_MASTER_DUMMY                0xFF
 
+/** SPI base address for SPI master mode*/
+#define SPI_MASTER_BASE      SPI
+
 #endif /* CONF_SPI_MASTER_H_INCLUDED */

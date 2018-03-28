@@ -24,6 +24,9 @@
 //#include "Arduino.h"
 //#include <SPI.h>
 
+#include <asf.h>
+#include "conf_spi_master.h"
+
 
 int
 SPI_sync(
@@ -211,3 +214,30 @@ XO3_Address(
   return 0;//success;
 } // XO3_Read
 */
+
+static void spi_master_initialize(void)
+{
+	/* Configure an SPI peripheral. */
+	spi_enable_clock(SPI_MASTER_BASE);
+	spi_disable(SPI_MASTER_BASE);
+	spi_reset(SPI_MASTER_BASE);
+	spi_set_lastxfer(SPI_MASTER_BASE);
+	spi_set_master_mode(SPI_MASTER_BASE);
+	spi_disable_mode_fault_detect(SPI_MASTER_BASE);
+	spi_set_peripheral_chip_select_value(SPI_MASTER_BASE, SPI_CHIP_PCS);
+	spi_set_clock_polarity(SPI_MASTER_BASE, SPI_CHIP_SEL, SPI_CLK_POLARITY);
+	spi_set_clock_phase(SPI_MASTER_BASE, SPI_CHIP_SEL, SPI_CLK_PHASE);
+	spi_set_bits_per_transfer(SPI_MASTER_BASE, SPI_CHIP_SEL,
+	SPI_CSR_BITS_8_BIT);
+	spi_set_baudrate_div(SPI_MASTER_BASE, SPI_CHIP_SEL,
+	(
+	#if (SAM4L)
+	sysclk_get_pba_hz()
+	#else
+	sysclk_get_peripheral_hz()
+	#endif
+	/ gs_ul_spi_clock));
+	spi_set_transfer_delay(SPI_MASTER_BASE, SPI_CHIP_SEL, SPI_DLYBS,
+	SPI_DLYBCT);
+	spi_enable(SPI_MASTER_BASE);
+}
