@@ -8,6 +8,7 @@
  */
 
 #include <asf.h>
+//#include <SpiRouter.h>
 
 float voltages[12] = { 0 };	
 const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0.9763, 0.4395, 0.9763, 1.4793, 0.8766, 0.8284 };
@@ -83,7 +84,10 @@ int main (void)
 	while (1) {
 		//ioport_toggle_pin_level(PIN_LEDTB);		
 		readADC();
-
+		/*XO3_WriteByte(0x00000800, 0xF);
+		delay_ms(100);
+		XO3_WriteByte(0x00000800, 0x0);*/
+		
 		//delay_ms(1000);
 		
 	}

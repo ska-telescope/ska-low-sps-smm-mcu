@@ -64,4 +64,17 @@
 //! Default Config Spi Master Dummy Field
 #define CONFIG_SPI_MASTER_DUMMY                0xFF
 
+/** SPI base address for SPI master mode*/
+#define SPI_MASTER_BASE      SPI
+
+/* Chip select. */
+#define SPI_CHIP_SEL 0
+#define SPI_CHIP_PCS spi_get_pcs(SPI_CHIP_SEL)
+
+/* Clock polarity. */
+#define SPI_CLK_POLARITY 0
+
+/* Clock phase. */
+#define SPI_CLK_PHASE 0
+
 #endif /* CONF_SPI_MASTER_H_INCLUDED */
