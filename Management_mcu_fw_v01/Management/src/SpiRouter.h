@@ -21,7 +21,7 @@ SPI_sync(
 	const uint8_t* txBuffer,
 	uint8_t*       rxBuffer,
 	uint16_t    length
-)
+);
 
 /*
 int

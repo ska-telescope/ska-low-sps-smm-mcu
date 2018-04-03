@@ -14,7 +14,7 @@
  * 
  */
 
-//#include <memory.h>
+#include <memory.h>
 //#include <string.h>
 
 //#include "MLC150.h"
