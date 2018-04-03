@@ -8,7 +8,8 @@
  */
 
 #include <asf.h>
-#include "SpiRouter.h"
+#include <SpiRouter.h>
+#include <regfile.h>
 
 float voltages[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };	
 const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0.9763, 0.4395, 0.9763, 1.4793, 0.8766, 0.8284 };

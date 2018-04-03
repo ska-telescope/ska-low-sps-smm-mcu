@@ -15,11 +15,12 @@
  */
 
 #include <memory.h>
-//#include <string.h>
+#include <string.h>
 
 //#include "MLC150.h"
-#include "SpiRouter.h"
+#include <SpiRouter.h>
 #include <asf.h>
+#include <regfile.h>
 
 //#include "Arduino.h"
 //#include <SPI.h>
