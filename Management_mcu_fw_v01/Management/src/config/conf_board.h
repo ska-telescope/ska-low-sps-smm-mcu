@@ -110,7 +110,27 @@
 #define PIN_UTXD PIO_PA10_IDX
 
 // ---------- SPI ----------
-#define PIN_ECSPI_MISO				(PIO_PA12_IDX)
+#ifndef CONF_BOARD_SPI
+#define CONF_BOARD_SPI
+#define CONF_BOARD_SPI_NPCS0
+#endif
+
+
+/** SPI MISO pin definition. */
+#define SPI_MISO_GPIO         (PIO_PA12_IDX)
+#define SPI_MISO_FLAGS       (PIO_PERIPH_A | PIO_PULLUP)
+/** SPI MOSI pin definition. */
+#define SPI_MOSI_GPIO         (PIO_PA13_IDX)
+#define SPI_MOSI_FLAGS       (PIO_PERIPH_A | PIO_PULLUP)
+/** SPI SPCK pin definition. */
+#define SPI_SPCK_GPIO         (PIO_PA14_IDX)
+#define SPI_SPCK_FLAGS       (PIO_PERIPH_A | PIO_PULLUP)
+
+/** SPI chip select 0 pin definition. (Only one configuration is possible) */
+#define SPI_NPCS0_GPIO         (PIO_PA11_IDX)
+#define SPI_NPCS0_FLAGS           (PIO_PERIPH_A | PIO_DEFAULT)
+
+/*#define PIN_ECSPI_MISO				(PIO_PA12_IDX)
 #define PIN_ECSPI_MISO_FLAGS        (PIO_PERIPH_A | PIO_PULLUP) //PIO_DEFAULT
 #define PIN_ECSPI_MOSI				(PIO_PA13_IDX)
 #define PIN_ECSPI_MOSI_FLAGS		(PIO_PERIPH_A | PIO_PULLUP)
@@ -118,7 +138,7 @@
 #define PIN_ECSPI_SCLK_FLAGS		(PIO_PERIPH_A | PIO_PULLUP)
 
 #define PIN_ECSPI_SS0				(PIO_PA11_IDX)
-#define PIN_ECSPI_SS0_FLAGS			(PIO_PERIPH_A | PIO_DEFAULT)
+#define PIN_ECSPI_SS0_FLAGS			(PIO_PERIPH_A | PIO_DEFAULT)*/
 
 
 // --------- ADC ---------

@@ -68,21 +68,8 @@ void board_init(void)
 	ioport_set_port_mode(IOPORT_PIOA, PIO_PA9A_URXD0 | PIO_PA10A_UTXD0, IOPORT_MODE_MUX_A);
 	ioport_disable_port(IOPORT_PIOA, PIO_PA9A_URXD0 | PIO_PA10A_UTXD0);
 	
-	// Configure SPI
-	gpio_configure_pin(PIN_ECSPI_MISO, PIN_ECSPI_MISO_FLAGS);
-	gpio_configure_pin(PIN_ECSPI_MOSI, PIN_ECSPI_MOSI_FLAGS);
-	gpio_configure_pin(PIN_ECSPI_SCLK, PIN_ECSPI_SCLK_FLAGS);
-	gpio_configure_pin(PIN_ECSPI_SS0, PIN_ECSPI_SS0_FLAGS);
-	
-	spi_enable_clock(SPI_MASTER_BASE);
-	spi_disable(SPI_MASTER_BASE);
-	spi_reset(SPI_MASTER_BASE);
-	spi_set_lastxfer(SPI_MASTER_BASE);
-	spi_set_master_mode(SPI_MASTER_BASE);
-	spi_disable_mode_fault_detect(SPI_MASTER_BASE);
-	spi_set_peripheral_chip_select_value(SPI_MASTER_BASE, 0);
-	spi_set_clock_polarity(SPI_MASTER_BASE, SPI_CHIP_SEL, SPI_CLK_POLARITY);
-	spi_set_clock_phase(SPI_MASTER_BASE, SPI_CHIP_SEL, SPI_CLK_PHASE);
-	spi_set_bits_per_transfer(SPI_MASTER_BASE, SPI_CHIP_SEL, SPI_CSR_BITS_8_BIT);
-	
+	gpio_configure_pin(SPI_MISO_GPIO, SPI_MISO_FLAGS);
+	gpio_configure_pin(SPI_MOSI_GPIO, SPI_MOSI_FLAGS);
+	gpio_configure_pin(SPI_SPCK_GPIO, SPI_SPCK_FLAGS);
+	gpio_configure_pin(SPI_NPCS0_GPIO, SPI_NPCS0_FLAGS);
 }

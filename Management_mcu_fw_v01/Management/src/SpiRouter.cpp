@@ -113,7 +113,7 @@ SPI_sync(
 		//SPI1.beginTransaction(SPISettings(12000000, MSBFIRST, SPI_MODE0)); //SPI1 - XO3 Setup
 		//digitalWrite(XO3_SS, LOW); //Set Low XO3_SS to select
 		for(int i=0;i<_count;i++){
-			spi_write(SPI_MASTER_BASE, tmp[i], 0, 0);
+			//spi_write(SPI_MASTER, tmp[i], 0, 0);
 			//rxbuf[i]=SPI1.transfer(tmp[i]);
 		}
 		//digitalWrite(XO3_SS, HIGH); //Set High XO3_SS to deselect

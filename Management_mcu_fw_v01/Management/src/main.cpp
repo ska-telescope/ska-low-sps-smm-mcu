@@ -8,12 +8,23 @@
  */
 
 #include <asf.h>
+#include "spi_master.h"
 #include <SpiRouter.h>
 #include <regfile.h>
+
+#define SPI_CLOCK_SPEED		4000000UL
+#define MYSPI			SPI
+#define BUFFERSIZE 1
+void send_spi(uint8_t data);
+uint8_t data_buffer[BUFFERSIZE];
+uint8_t data_rx_buffer[BUFFERSIZE];
+
 
 float voltages[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };	
 const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0.9763, 0.4395, 0.9763, 1.4793, 0.8766, 0.8284 };
 float buck2temp = 0;
+
+
 
 /* ----------------------------------------- ADC SP Start --- */
 void readADC(void)
@@ -43,36 +54,6 @@ void readADC(void)
 
 /* ----------------------------------------- ADC SP End --- */
 
-/* ----------------------------------------- SPI SP Start --- */
-
-/*void spi_master_init(Spi *p_spi)
-{
-	spi_enable_clock(p_spi);
-	spi_reset(p_spi);
-	spi_set_master_mode(p_spi);
-	spi_disable_mode_fault_detect(p_spi);
-	spi_disable_loopback(p_spi);
-	spi_set_peripheral_chip_select_value(p_spi,
-	spi_get_pcs(DEFAULT_CHIP_ID));
-	spi_set_fixed_peripheral_select(p_spi);
-	spi_disable_peripheral_select_decode(p_spi);
-	spi_set_delay_between_chip_select(p_spi, CONFIG_SPI_MASTER_DELAY_BCS);
-}
-void spi_master_setup_device(Spi *p_spi, struct spi_device *device,
-spi_flags_t flags, uint32_t baud_rate, board_spi_select_id_t sel_id)
-{
-	spi_set_transfer_delay(p_spi, device->id, CONFIG_SPI_MASTER_DELAY_BS,
-	CONFIG_SPI_MASTER_DELAY_BCT);
-	spi_set_bits_per_transfer(p_spi, device->id, CONFIG_SPI_MASTER_BITS_PER_TRANSFER);
-	spi_set_baudrate_div(p_spi, device->id,
-	spi_calc_baudrate_div(baud_rate, sysclk_get_peripheral_hz()));
-	spi_configure_cs_behavior(p_spi, device->id, SPI_CS_KEEP_LOW);
-	spi_set_clock_polarity(p_spi, device->id, flags >> 1);
-	spi_set_clock_phase(p_spi, device->id, ((flags & 0x1) ^ 0x1));
-}*/
-
-/* ----------------------------------------- ADC SP End --- */
-
 int main (void)
 {
 	/* Insert system clock initialization code here*/
@@ -81,15 +62,45 @@ int main (void)
 
 	adc_start(ADC);
 	/* Insert application code here, after the board has been initialized. */
+	
+	spi_flags_t spi_flags = SPI_MODE_0;
+	board_spi_select_id_t spi_select_id = 0;
+	struct spi_device device = {
+		.id = 0
+	};
+	spi_master_init(MYSPI);
+	spi_master_setup_device(MYSPI, &device, spi_flags,	SPI_CLOCK_SPEED, spi_select_id);
+	spi_enable(MYSPI);
+	spi_enable_clock(MYSPI);
 
 	while (1) {
-		//ioport_toggle_pin_level(PIN_LEDTB);		
+		ioport_toggle_pin_level(PIN_LEDK8);				
 		readADC();
-		XO3_WriteByte(0x00000800, 0xF);
+		//XO3_WriteByte(0x00000800, 0xF);
 		delay_ms(100);
-		XO3_WriteByte(0x00000800, 0x0);
-		
+		//XO3_WriteByte(0x00000800, 0x0);
+		//spi_write(SPI_MASTER, 0xf, 0, 1);
+		send_spi(0xF1);
 		//delay_ms(1000);
 		
 	}
+}
+
+void send_spi(uint8_t data){
+	
+	struct spi_device device = {
+		
+		device.id = 0
+		
+	};
+	spi_select_device(MYSPI, &device);
+	data_buffer[0] = data;
+	
+	//spi_write_packet(MYSPI, data_buffer, sizeof(data_buffer));
+	spi_transceive_packet(MYSPI, data_buffer, data_rx_buffer, sizeof(data_buffer));
+	
+	spi_deselect_device(MYSPI, &device);
+	delay_us(10);
+	
+	
 }
