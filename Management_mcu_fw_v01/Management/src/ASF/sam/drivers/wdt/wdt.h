@@ -1,9 +1,9 @@
 /**
  * \file
  *
- * \brief SPI Master configuration.
+ * \brief Watchdog Timer (WDT) driver for SAM.
  *
- * Copyright (c) 2015 Atmel Corporation. All rights reserved.
+ * Copyright (c) 2011-2015 Atmel Corporation. All rights reserved.
  *
  * \asf_license_start
  *
@@ -44,24 +44,35 @@
  * Support and FAQ: visit <a href="http://www.atmel.com/design-support/">Atmel Support</a>
  */
 
-#ifndef CONF_SPI_MASTER_H_INCLUDED
-#define CONF_SPI_MASTER_H_INCLUDED
+#ifndef WDT_H_INCLUDED
+#define WDT_H_INCLUDED
 
-/* Possibility to change low-level configurations here. */
+#include "compiler.h"
 
-/** Default Configuration of SPI Master Delay BCS */
-#define CONFIG_SPI_MASTER_DELAY_BCS            0
+/// @cond 0
+/**INDENT-OFF**/
+#ifdef __cplusplus
+extern "C" {
+#endif
+/**INDENT-ON**/
+/// @endcond
 
-/** Default Configuration of SPI Master Bits per Transfer Definition */
-#define CONFIG_SPI_MASTER_BITS_PER_TRANSFER    8
+#define WDT_INVALID_ARGUMENT 0xFFFF
 
-/** Default Configuration of SPI Master Delay BCT */
-#define CONFIG_SPI_MASTER_DELAY_BCT            0
+uint32_t wdt_get_timeout_value(uint32_t ul_us, uint32_t ul_sclk);
+void wdt_init(Wdt *p_wdt, uint32_t ul_mode, uint16_t us_counter,
+		uint16_t us_delta);
+void wdt_disable(Wdt *p_wdt);
+void wdt_restart(Wdt *p_wdt);
+uint32_t wdt_get_status(Wdt *p_wdt);
+uint32_t wdt_get_us_timeout_period(Wdt *p_wdt, uint32_t ul_sclk);
 
-/** Default Configuration of SPI Master Delay BS */
-#define CONFIG_SPI_MASTER_DELAY_BS             0
+/// @cond 0
+/**INDENT-OFF**/
+#ifdef __cplusplus
+}
+#endif
+/**INDENT-ON**/
+/// @endcond
 
-/** Default Configuration of SPI Master Dummy Field */
-#define CONFIG_SPI_MASTER_DUMMY                0xFF
-
-#endif /* CONF_SPI_MASTER_H_INCLUDED */
+#endif /* WDT_H_INCLUDED */

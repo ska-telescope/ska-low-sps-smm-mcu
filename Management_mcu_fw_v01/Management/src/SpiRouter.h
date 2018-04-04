@@ -11,10 +11,17 @@
 #define SPIROUTER_H_
 
 #include <stdint.h>
-#include <cstddef>
+//#include <cstddef>
 
 #define SPI_FIFO_SIZE 1024
 
+int
+SPI_sync(
+	uint32_t       slaveId,
+	const uint8_t* txBuffer,
+	uint8_t*       rxBuffer,
+	uint16_t    length
+);
 
 /*
 int

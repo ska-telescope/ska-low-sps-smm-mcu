@@ -59,8 +59,8 @@ void board_init(void)
 	ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_LOW);
 	ioport_set_pin_dir(PIN_LEDK8, IOPORT_DIR_OUTPUT); // Led Blue
 	ioport_set_pin_level(PIN_LEDK8, IOPORT_PIN_LEVEL_LOW);
-	ioport_set_pin_dir(PIN_LEDTB, IOPORT_DIR_OUTPUT); // Led DemoBoard
-	ioport_set_pin_level(PIN_LEDTB, IOPORT_PIN_LEVEL_HIGH);
+	ioport_set_pin_dir(PIN_LEDTB, IOPORT_DIR_OUTPUT); // Led Amber Demo
+	ioport_set_pin_level(PIN_LEDTB, IOPORT_PIN_LEVEL_LOW);
 	
 	// Configure GPIO
 	//ioport_set_pin_dir(XO3_REFRESH, IOPORT_DIR_OUTPUT); // Pin XO3_REFRESH - Temp Disabled
@@ -70,6 +70,8 @@ void board_init(void)
 	ioport_set_port_mode(IOPORT_PIOA, PIO_PA9A_URXD0 | PIO_PA10A_UTXD0, IOPORT_MODE_MUX_A);
 	ioport_disable_port(IOPORT_PIOA, PIO_PA9A_URXD0 | PIO_PA10A_UTXD0);
 	
-	
-	
+	gpio_configure_pin(SPI_MISO_GPIO, SPI_MISO_FLAGS);
+	gpio_configure_pin(SPI_MOSI_GPIO, SPI_MOSI_FLAGS);
+	gpio_configure_pin(SPI_SPCK_GPIO, SPI_SPCK_FLAGS);
+	gpio_configure_pin(SPI_NPCS0_GPIO, SPI_NPCS0_FLAGS);
 }

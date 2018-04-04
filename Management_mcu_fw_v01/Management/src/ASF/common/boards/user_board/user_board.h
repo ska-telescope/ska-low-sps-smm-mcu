@@ -36,5 +36,12 @@
 // External oscillator startup time
 //#define BOARD_XOSC_STARTUP_US  500000
 
+#define BOARD_FREQ_SLCK_XTAL      (32768U)
+#define BOARD_FREQ_SLCK_BYPASS    (32768U)
+#define BOARD_FREQ_MAINCK_XTAL    (12000000U)
+#define BOARD_FREQ_MAINCK_BYPASS  (12000000U)
+#define BOARD_MCK                 CHIP_FREQ_CPU_MAX
+#define BOARD_OSC_STARTUP_US      500000
+
 
 #endif // USER_BOARD_H

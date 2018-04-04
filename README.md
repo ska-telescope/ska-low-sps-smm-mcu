@@ -1,7 +1,6 @@
 # SKA Management MCU Firmware
 
-~~Based on [ATSAM4S8C](http://www.microchip.com/wwwproducts/en/ATSAM4S8C)~~
-Based on [SAM4S Xplained Pro] (http://www.microchip.com/DevelopmentTools/ProductDetails.aspx?PartNO=atsam4s-xpro) with SAM4SD32C
+Based on [ATSAM4S8C](http://www.microchip.com/wwwproducts/en/ATSAM4S8C)
 
 ## Built With
 
