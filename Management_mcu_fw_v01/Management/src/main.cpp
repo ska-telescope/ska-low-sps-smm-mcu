@@ -80,7 +80,7 @@ int main (void)
 		delay_ms(100);
 		//XO3_WriteByte(0x00000800, 0x0);
 		//spi_write(SPI_MASTER, 0xf, 0, 1);
-		send_spi(0xF1);
+		send_spi(0xF1); // Farlocca
 		//delay_ms(1000);
 		
 	}
