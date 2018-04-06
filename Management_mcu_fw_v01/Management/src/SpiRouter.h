@@ -52,4 +52,9 @@ XO3_Address(
     void*     privateData
 );
 
+/*void
+send_spi(
+	uint8_t data
+);*/
+
 #endif // ifndef SPIROUTER_H_

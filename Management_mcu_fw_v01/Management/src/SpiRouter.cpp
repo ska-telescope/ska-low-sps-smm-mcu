@@ -9,6 +9,7 @@
  * V1.2  - XO3 SPI ok, remove mitigation from MCU side.
  * V1.3  - Added free to buffer and rxbuffer to free memory. [OoF Issue] 
  * V1.4  - New SPI version
+ * V2.0  - Rewrite code to support SAM4S, 32bit read
  *
  * Copyright (c) 2017 Sanitas EG srl.  All right reserved.
  * 
@@ -25,6 +26,7 @@
 //#include "Arduino.h"
 //#include <SPI.h>
 
+#define MYSPI			SPI
 
 int
 SPI_sync(
@@ -47,8 +49,12 @@ SPI_sync(
 
 	uint16_t _length = length;
 	uint16_t _count  = length;
-
 	
+	struct spi_device device = {
+		
+		device.id = 0
+		
+	};	
 		
 		buffer = malloc(length + 8); // Make sure we have some (4) spare bytes at the end...
 		rxbuffer = malloc(length + 8); // Make sure we have some (4) spare bytes at the end...
@@ -109,17 +115,17 @@ SPI_sync(
 				ptr++;
 			}
 		}
-		
-		//SPI1.beginTransaction(SPISettings(12000000, MSBFIRST, SPI_MODE0)); //SPI1 - XO3 Setup
-		//digitalWrite(XO3_SS, LOW); //Set Low XO3_SS to select
-		for(int i=0;i<_count;i++){
+
+		spi_select_device(MYSPI, &device); // Select Device and pulldown CS		
+		/*for(int i=0;i<_count;i++){
 			//spi_write(SPI_MASTER, tmp[i], 0, 0);
 			//rxbuf[i]=SPI1.transfer(tmp[i]);
-		}
-		//digitalWrite(XO3_SS, HIGH); //Set High XO3_SS to deselect
-		//SPI1.endTransaction();
+			spi_transceive_packet(MYSPI, tmp[i], rxbuf[i], sizeof(tmp[i]));
+		}*/
+		spi_transceive_packet(MYSPI, tmp, rxbuf, _count);
+		spi_deselect_device(MYSPI, &device); // Deselect Device and pullup CS
 		
-		memcpy(rxBuffer, &rxbuf[4], length);
+		memcpy(rxBuffer, &rxbuf[offset], length);
 		if (!little_endian) {
 			uint16_t* ptr = (uint16_t*)rxBuffer;
 
@@ -152,8 +158,8 @@ XO3_WriteByte(
     uint32_t value
 )
 {
-	uint8_t txBuffer[8];
-	uint8_t rxBuffer[8];
+	uint8_t txBuffer[10];
+	uint8_t rxBuffer[10];
 
 	memset(txBuffer, 0, 8);
 
@@ -162,10 +168,12 @@ XO3_WriteByte(
 	txBuffer[1] = 0xFF & (offset >> 16);
 	txBuffer[2] = 0xFF & (offset >> 8);
 	txBuffer[3] = 0xFF & (offset);
-	txBuffer[4] = 0xFF & (value >> 8);
-	txBuffer[5] = 0xFF & (value);
+	txBuffer[4] = 0xFF & (value >> 24);
+	txBuffer[5] = 0xFF & (value >> 16);
+	txBuffer[6] = 0xFF & (value >> 8);
+	txBuffer[7] = 0xFF & (value);
 
-  int success = SPI_sync(1, txBuffer, rxBuffer, 8);
+  int success = SPI_sync(1, txBuffer, rxBuffer, 10);
 } // XO3_Write
 /*
 int
@@ -181,8 +189,8 @@ XO3_Read(
     uint32_t* value
 )
 {
-  uint8_t txBuffer[8];
-  uint8_t rxBuffer[8];
+  uint8_t txBuffer[10];
+  uint8_t rxBuffer[10];
   uint32_t dato=0;
   memset(txBuffer, 0, 8);
 
@@ -192,10 +200,11 @@ XO3_Read(
   txBuffer[2] = 0xFF & (offset >> 8);
   txBuffer[3] = 0xFF & (offset);
 
-  int success = SPI_sync(1, txBuffer, rxBuffer, 8);
+  int success = SPI_sync(1, txBuffer, rxBuffer, 10);
 
-  dato = (((rxBuffer[5] & 0xFF) << 8) | rxBuffer[6]);
-  dato=dato&0x0000ffff;
+  dato = (((rxBuffer[6] & 0xFF) << 24) | ((rxBuffer[7] & 0xFF) << 16) | ((rxBuffer[8] & 0xFF) << 8) | rxBuffer[9]);
+  //memcpy(dato, rxBuffer[6], 4);
+  //dato=dato&0x0000ffff;
   *value=dato;
   return success;
 } // XO3_Read
@@ -213,3 +222,22 @@ XO3_Address(
   return 0;//success;
 } // XO3_Read
 */
+
+/*void send_spi(uint8_t data){
+	
+	struct spi_device device = {
+		
+		device.id = 0
+		
+	};
+	spi_select_device(MYSPI, &device);
+	data_buffer[0] = data;
+	
+	//spi_write_packet(MYSPI, data_buffer, sizeof(data_buffer));
+	spi_transceive_packet(MYSPI, data_buffer, data_rx_buffer, sizeof(data_buffer));
+	
+	spi_deselect_device(MYSPI, &device);
+	delay_us(10);
+	
+	
+}*/

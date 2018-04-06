@@ -74,33 +74,25 @@ int main (void)
 	spi_enable_clock(MYSPI);
 
 	while (1) {
-		ioport_toggle_pin_level(PIN_LEDK8);				
+					
 		readADC();
 		//XO3_WriteByte(0x00000800, 0xF);
 		delay_ms(100);
 		//XO3_WriteByte(0x00000800, 0x0);
 		//spi_write(SPI_MASTER, 0xf, 0, 1);
-		send_spi(0xF1); // Farlocca
+		//send_spi(0xF1); // Farlocca
 		//delay_ms(1000);
 		
-	}
-}
+		uint32_t dato;
+		uint32_t dato4;
+		uint32_t dato8;
+   
+		XO3_WriteByte(regfile_user_reg0, 0x12345678);
+		XO3_Read(0x00000008, &dato);
+		XO3_Read(regfile_user_reg0, &dato4);
+		XO3_Read(0x00000008, &dato8);
 
-void send_spi(uint8_t data){
-	
-	struct spi_device device = {
+		ioport_toggle_pin_level(PIN_LEDK8);	
 		
-		device.id = 0
-		
-	};
-	spi_select_device(MYSPI, &device);
-	data_buffer[0] = data;
-	
-	//spi_write_packet(MYSPI, data_buffer, sizeof(data_buffer));
-	spi_transceive_packet(MYSPI, data_buffer, data_rx_buffer, sizeof(data_buffer));
-	
-	spi_deselect_device(MYSPI, &device);
-	delay_us(10);
-	
-	
+	}
 }
