@@ -11,6 +11,12 @@
 #include "spi_master.h"
 #include <SpiRouter.h>
 #include <regfile.h>
+#include "build_def.h"
+
+const uint32_t _build_version = 0xb0000001;
+const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
+const uint32_t _build_hour = (0xff << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
+
 
 #define SPI_CLOCK_SPEED		4000000UL
 #define MYSPI			SPI
@@ -19,12 +25,9 @@ void send_spi(uint8_t data);
 uint8_t data_buffer[BUFFERSIZE];
 uint8_t data_rx_buffer[BUFFERSIZE];
 
-
 float voltages[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };	
 const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0.9763, 0.4395, 0.9763, 1.4793, 0.8766, 0.8284 };
 float buck2temp = 0;
-
-
 
 /* ----------------------------------------- ADC SP Start --- */
 void readADC(void)
@@ -87,12 +90,12 @@ int main (void)
 		uint32_t dato4;
 		uint32_t dato8;
    
-		XO3_WriteByte(regfile_user_reg0, 0x12345678);
-		XO3_Read(0x00000008, &dato);
+		XO3_WriteByte(regfile_user_reg0, _build_hour);
+		XO3_Read(regfile_user_reg0, &dato);
 		XO3_Read(regfile_user_reg0, &dato4);
 		XO3_Read(0x00000008, &dato8);
 
-		ioport_toggle_pin_level(PIN_LEDK8);	
+		//ioport_toggle_pin_level(PIN_LEDK8);	
 		
 	}
 }
