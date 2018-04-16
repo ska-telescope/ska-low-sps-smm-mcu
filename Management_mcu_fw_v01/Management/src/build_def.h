@@ -1,4 +1,4 @@
-// source file build_defs.h
+// source file build_def.h
 
 #ifndef BUILD_DEFS_H
 

@@ -15,7 +15,7 @@
 
 const uint32_t _build_version = 0xb0000001;
 const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
-const uint32_t _build_hour = (0xff << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
+const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
 
 #define SPI_CLOCK_SPEED		4000000UL
@@ -25,15 +25,16 @@ void send_spi(uint8_t data);
 uint8_t data_buffer[BUFFERSIZE];
 uint8_t data_rx_buffer[BUFFERSIZE];
 
-float voltages[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };	
+float voltagesnorm[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };
+uint32_t voltages[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };	
 const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0.9763, 0.4395, 0.9763, 1.4793, 0.8766, 0.8284 };
-float buck2temp = 0;
+float buck2tempnorm = 0;
+uint32_t buck2temp = 0;
 
 /* ----------------------------------------- ADC SP Start --- */
-void readADC(void)
+void readADCnormalized(void) // Normalized with R divider value
 {
 	float adc_value;
-	uint32_t normalized_adc_value;
 	// Test ADC
 	//adc_val = adc_get_channel_value(ADC, ADC_CHANNEL_0);
 	
@@ -47,15 +48,58 @@ void readADC(void)
 		adc_value /= 10;
 		//normalize
 		//normalized_adc_value = (adc_value * 1000) / 4096; // Da sistemare in base al partitore
-		voltages[x] = (adc_value * voltagesMot[x]);
+		voltagesnorm[x] = (adc_value * voltagesMot[x]);
 		x++;
 	}
-	buck2temp += adc_get_channel_value(ADC, ADC_BUCK2TEMP); // Temp Buck 2
-	buck2temp = ((buck2temp * 0.4395) + 19) / 6.75;
+	buck2tempnorm += adc_get_channel_value(ADC, ADC_BUCK2TEMP); // Temp Buck 2 temp
+	buck2tempnorm = ((buck2tempnorm * 0.4395) + 19) / 6.75;
+	return;
+}
+
+void readADC(void) // Pure ADC value
+{
+	uint32_t adc_value;
+	// Test ADC
+	//adc_val = adc_get_channel_value(ADC, ADC_CHANNEL_0);
+	
+	int x = 0;
+	for(int y=0; y < 13; y++) // Voltages
+	{
+		if (y == 10) y++;
+		adc_value = 0;
+		for(int i=0; i < 10; i++)
+		adc_value += adc_get_channel_value(ADC,  (enum adc_channel_num_t)y);
+		adc_value /= 10;
+		//normalize
+		//normalized_adc_value = (adc_value * 1000) / 4096; // Da sistemare in base al partitore
+		voltages[x] = (adc_value);
+		x++;
+	}
+	buck2temp += adc_get_channel_value(ADC, ADC_BUCK2TEMP); // Temp Buck 2 temp
+	//buck2temp = ((buck2temp * 0.4395) + 19) / 6.75;
 	return;
 }
 
 /* ----------------------------------------- ADC SP End --- */
+
+void SPIdataBlock(void){
+	// Voltages
+	XO3_WriteByte(sam_voltage_soc, voltages[0]);
+	XO3_WriteByte(sam_voltage_arm, voltages[1]);
+	XO3_WriteByte(sam_voltage_ddr, voltages[2]);
+	XO3_WriteByte(sam_voltage_v25, voltages[3]);
+	XO3_WriteByte(sam_voltage_v1, voltages[4]);
+	XO3_WriteByte(sam_voltage_v11, voltages[5]);
+	XO3_WriteByte(sam_voltage_vcore, voltages[6]);
+	XO3_WriteByte(sam_voltage_v15, voltages[7]);
+	XO3_WriteByte(sam_voltage_v33, voltages[8]);
+	XO3_WriteByte(sam_voltage_v5, voltages[9]);
+	XO3_WriteByte(sam_voltage_v3, voltages[10]);
+	XO3_WriteByte(sam_voltage_v28, voltages[11]);
+	// Temperatures
+	XO3_WriteByte(sam_temp_Buck, buck2temp);
+	//XO3_WriteByte(sam_temp_MCU, xxx);
+}
 
 int main (void)
 {
@@ -75,27 +119,35 @@ int main (void)
 	spi_master_setup_device(MYSPI, &device, spi_flags,	SPI_CLOCK_SPEED, spi_select_id);
 	spi_enable(MYSPI);
 	spi_enable_clock(MYSPI);
+	delay_ms(10);
+	XO3_WriteByte(sam_mcufw_build_version, _build_version);
+	XO3_WriteByte(sam_mcufw_build_time, _build_time);
+	XO3_WriteByte(sam_mcufw_build_date, _build_date);
+	readADC(); // Drop first read
 
 	while (1) {
-					
 		readADC();
+		SPIdataBlock();
 		//XO3_WriteByte(0x00000800, 0xF);
-		delay_ms(100);
+		//delay_ms(100);
 		//XO3_WriteByte(0x00000800, 0x0);
 		//spi_write(SPI_MASTER, 0xf, 0, 1);
 		//send_spi(0xF1); // Farlocca
 		//delay_ms(1000);
 		
-		uint32_t dato;
-		uint32_t dato4;
-		uint32_t dato8;
+		//uint32_t dato;
+		//uint32_t dato4;
+		//uint32_t dato8;
    
-		XO3_WriteByte(regfile_user_reg0, _build_hour);
-		XO3_Read(regfile_user_reg0, &dato);
-		XO3_Read(regfile_user_reg0, &dato4);
-		XO3_Read(0x00000008, &dato8);
+		//XO3_WriteByte(regfile_user_reg0, _build_hour);
+		//XO3_Read(regfile_user_reg0, &dato);
+		//XO3_Read(regfile_user_reg0, &dato4);
+		//XO3_Read(0x00000008, &dato8);
+		
+		//XO3_Read(regfile_user_reg0, &dato);
 
 		//ioport_toggle_pin_level(PIN_LEDK8);	
 		
 	}
+
 }
