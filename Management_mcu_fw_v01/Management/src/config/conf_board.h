@@ -88,10 +88,10 @@
 #define PIN_FAN	 PIO_PA2_IDX
 
 // ---------- I2C ----------
-#define I2C1SDA PIO_PA3_IDX
-#define I2C1SDA (PIO_PERIPH_A | PIO_DEFAULT)
-#define I2C1SCL PIO_PA4_IDX
-#define I2C1SCL (PIO_PERIPH_A | PIO_DEFAULT)
+#define I2C1_SDA PIO_PA3_IDX // TWI0
+#define I2C1_SDA_FLAGS (PIO_PERIPH_A | PIO_DEFAULT)
+#define I2C1_SCL PIO_PA4_IDX // TWI0
+#define I2C1_SCL_FLAGS (PIO_PERIPH_A | PIO_DEFAULT)
 
 // ---------- GPIO ----------
 #define XO3_REFRESH PIO_PA6_IDX

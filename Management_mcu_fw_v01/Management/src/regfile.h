@@ -1,5 +1,7 @@
 // sam.h
 
+#define sam_offset	0x00030000
+
 #define sam_mcufw_build_version  	0x00000000	//RW
 #define sam_mcufw_build_version_M	0xffffffff
 #define sam_mcufw_build_version_R	0x0

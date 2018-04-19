@@ -12,18 +12,20 @@
 #include <SpiRouter.h>
 #include <regfile.h>
 #include "build_def.h"
+//#include "i2c.h"
 
 const uint32_t _build_version = 0xb0000001;
 const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
-
+// ----- SPI -------
 #define SPI_CLOCK_SPEED		4000000UL
 #define MYSPI			SPI
 #define BUFFERSIZE 1
 void send_spi(uint8_t data);
 uint8_t data_buffer[BUFFERSIZE];
 uint8_t data_rx_buffer[BUFFERSIZE];
+// ----- SPI -------
 
 float voltagesnorm[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };
 uint32_t voltages[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };	
@@ -84,20 +86,20 @@ void readADC(void) // Pure ADC value
 
 void SPIdataBlock(void){
 	// Voltages
-	XO3_WriteByte(sam_voltage_soc, voltages[0]);
-	XO3_WriteByte(sam_voltage_arm, voltages[1]);
-	XO3_WriteByte(sam_voltage_ddr, voltages[2]);
-	XO3_WriteByte(sam_voltage_v25, voltages[3]);
-	XO3_WriteByte(sam_voltage_v1, voltages[4]);
-	XO3_WriteByte(sam_voltage_v11, voltages[5]);
-	XO3_WriteByte(sam_voltage_vcore, voltages[6]);
-	XO3_WriteByte(sam_voltage_v15, voltages[7]);
-	XO3_WriteByte(sam_voltage_v33, voltages[8]);
-	XO3_WriteByte(sam_voltage_v5, voltages[9]);
-	XO3_WriteByte(sam_voltage_v3, voltages[10]);
-	XO3_WriteByte(sam_voltage_v28, voltages[11]);
+	XO3_WriteByte(sam_voltage_soc + sam_offset, voltages[0]);
+	XO3_WriteByte(sam_voltage_arm + sam_offset, voltages[1]);
+	XO3_WriteByte(sam_voltage_ddr + sam_offset, voltages[2]);
+	XO3_WriteByte(sam_voltage_v25 + sam_offset, voltages[3]);
+	XO3_WriteByte(sam_voltage_v1 + sam_offset, voltages[4]);
+	XO3_WriteByte(sam_voltage_v11 + sam_offset, voltages[5]);
+	XO3_WriteByte(sam_voltage_vcore + sam_offset, voltages[6]);
+	XO3_WriteByte(sam_voltage_v15 + sam_offset, voltages[7]);
+	XO3_WriteByte(sam_voltage_v33 + sam_offset, voltages[8]);
+	XO3_WriteByte(sam_voltage_v5 + sam_offset, voltages[9]);
+	XO3_WriteByte(sam_voltage_v3 + sam_offset, voltages[10]);
+	XO3_WriteByte(sam_voltage_v28 + sam_offset, voltages[11]);
 	// Temperatures
-	XO3_WriteByte(sam_temp_Buck, buck2temp);
+	XO3_WriteByte(sam_temp_Buck + sam_offset, buck2temp);
 	//XO3_WriteByte(sam_temp_MCU, xxx);
 }
 
@@ -120,14 +122,17 @@ int main (void)
 	spi_enable(MYSPI);
 	spi_enable_clock(MYSPI);
 	delay_ms(10);
-	XO3_WriteByte(sam_mcufw_build_version, _build_version);
-	XO3_WriteByte(sam_mcufw_build_time, _build_time);
-	XO3_WriteByte(sam_mcufw_build_date, _build_date);
+	XO3_WriteByte(sam_mcufw_build_version + sam_offset, _build_version);
+	XO3_WriteByte(sam_mcufw_build_time + sam_offset, _build_time);
+	XO3_WriteByte(sam_mcufw_build_date + sam_offset, _build_date);
 	readADC(); // Drop first read
+	//SetupTWI0();
 
 	while (1) {
+		delay_ms(1000);
 		readADC();
 		SPIdataBlock();
+		
 		//XO3_WriteByte(0x00000800, 0xF);
 		//delay_ms(100);
 		//XO3_WriteByte(0x00000800, 0x0);
@@ -140,7 +145,7 @@ int main (void)
 		//uint32_t dato8;
    
 		//XO3_WriteByte(regfile_user_reg0, _build_hour);
-		//XO3_Read(regfile_user_reg0, &dato);
+		//XO3_Read(sam_mcufw_build_date+sam_offset, &dato);
 		//XO3_Read(regfile_user_reg0, &dato4);
 		//XO3_Read(0x00000008, &dato8);
 		
