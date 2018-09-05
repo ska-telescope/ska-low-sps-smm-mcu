@@ -419,6 +419,7 @@
       <Value>../src/ASF/common/services/spi</Value>
       <Value>../src/ASF/sam/drivers/spi</Value>
       <Value>../src/ASF/sam/drivers/wdt</Value>
+      <Value>../src/regs</Value>
     </ListValues>
   </armgcc.compiler.directories.IncludePaths>
   <armgcc.compiler.optimization.level>Optimize (-O1)</armgcc.compiler.optimization.level>
@@ -466,6 +467,7 @@
       <Value>../src/ASF/common/services/spi</Value>
       <Value>../src/ASF/sam/drivers/spi</Value>
       <Value>../src/ASF/sam/drivers/wdt</Value>
+      <Value>../src/regs</Value>
     </ListValues>
   </armgcccpp.compiler.directories.IncludePaths>
   <armgcccpp.compiler.optimization.level>Optimize (-O1)</armgcccpp.compiler.optimization.level>
@@ -549,6 +551,7 @@
     <Folder Include="src\ASF\thirdparty\CMSIS\Lib\" />
     <Folder Include="src\ASF\thirdparty\CMSIS\Lib\GCC\" />
     <Folder Include="src\config\" />
+    <Folder Include="src\regs\" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\ASF\common\services\spi\sam_spi\spi_master.c">
@@ -578,13 +581,22 @@
     <Compile Include="src\build_def.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\i2c.c">
+    <Compile Include="src\regs\intctrl.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\i2c.h">
+    <Compile Include="src\regs\mdio.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\regfile.h">
+    <Compile Include="src\regs\onewire.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\regs\regfile.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\regs\sam.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\regs\uart.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\SpiRouter.h">

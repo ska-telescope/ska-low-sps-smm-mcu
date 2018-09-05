@@ -10,9 +10,24 @@
 #include <asf.h>
 #include "spi_master.h"
 #include <SpiRouter.h>
-#include <regfile.h>
 #include "build_def.h"
 //#include "i2c.h"
+
+// Registers
+#include "intctrl.h"
+#include "mdio.h"
+#include "onewire.h"
+#include "regfile.h"
+#include "sam.h"
+#include "uart.h"
+
+// Register Base Address
+#define regfile_offset	0x00000000
+#define i2c_offset		0x00010000
+#define intctr_offset	0x00020000
+#define sam_offset		0x00030000
+#define uart_offset		0x00070000
+
 
 const uint32_t _build_version = 0xb0000001;
 const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
@@ -151,7 +166,7 @@ int main (void)
 		
 		//XO3_Read(regfile_user_reg0, &dato);
 
-		//ioport_toggle_pin_level(PIN_LEDK8);	
+		ioport_toggle_pin_level(PIN_LEDK8);	
 		
 	}
 

@@ -21,7 +21,14 @@
 //#include "MLC150.h"
 #include <SpiRouter.h>
 #include <asf.h>
-#include <regfile.h>
+
+// Registers
+#include "intctrl.h"
+#include "mdio.h"
+#include "onewire.h"
+#include "regfile.h"
+#include "sam.h"
+#include "uart.h"
 
 //#include "Arduino.h"
 //#include <SPI.h>

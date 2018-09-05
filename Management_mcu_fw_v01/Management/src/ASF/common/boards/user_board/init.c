@@ -75,6 +75,6 @@ void board_init(void)
 	gpio_configure_pin(SPI_NPCS0_GPIO, SPI_NPCS0_FLAGS);
 	
 	// I2C
-	gpio_configure_pin(I2C1_SDA, I2C1_SDA_FLAGS);
-	gpio_configure_pin(I2C1_SCL, I2C1_SCL_FLAGS);
+	/*gpio_configure_pin(I2C1_SDA, I2C1_SDA_FLAGS);
+	gpio_configure_pin(I2C1_SCL, I2C1_SCL_FLAGS);*/
 }
