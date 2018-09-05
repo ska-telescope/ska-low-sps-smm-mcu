@@ -118,6 +118,11 @@ void SPIdataBlock(void){
 	//XO3_WriteByte(sam_temp_MCU, xxx);
 }
 
+volatile uint32_t MS_Timer = 0;
+void SysTick_Handler(void) {
+	MS_Timer++;                // Increment global millisecond timer
+}
+
 int main (void)
 {
 	/* Insert system clock initialization code here*/
@@ -142,11 +147,18 @@ int main (void)
 	XO3_WriteByte(sam_mcufw_build_date + sam_offset, _build_date);
 	readADC(); // Drop first read
 	//SetupTWI0();
+	
+	SysTick_Config(F_CPU/1000);
+	uint32_t  Timeout = MS_Timer + 1000;
 
 	while (1) {
-		delay_ms(1000);
-		readADC();
-		SPIdataBlock();
+		//delay_ms(250);
+		if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
+			Timeout += 1000;  // Repeat this timeout in 500 milliseconds
+			readADC();
+			SPIdataBlock();
+			ioport_toggle_pin_level(PIN_LEDK8);	
+		}
 		
 		//XO3_WriteByte(0x00000800, 0xF);
 		//delay_ms(100);
@@ -165,9 +177,7 @@ int main (void)
 		//XO3_Read(0x00000008, &dato8);
 		
 		//XO3_Read(regfile_user_reg0, &dato);
-
-		ioport_toggle_pin_level(PIN_LEDK8);	
-		
+		ioport_toggle_pin_level(PIN_LEDK7);	
 	}
 
 }
