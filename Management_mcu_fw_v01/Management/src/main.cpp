@@ -48,6 +48,8 @@ const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0
 float buck2tempnorm = 0;
 uint32_t buck2temp = 0;
 
+pwm_channel_t pwm_opts;
+
 /* ----------------------------------------- ADC SP Start --- */
 void readADCnormalized(void) // Normalized with R divider value
 {
@@ -148,6 +150,23 @@ int main (void)
 	readADC(); // Drop first read
 	//SetupTWI0();
 	
+	// PWM
+	pwm_clock_t pwm_clock_opts = {
+		.ul_clka = 5000000, //10Khz frequency = .1 ms steps
+		.ul_clkb = 0,
+		.ul_mck =  sysclk_get_main_hz() //main clock speed is 240Mhz!, not 120mhz
+	};
+	pwm_opts.ul_prescaler = PWM_CMR_CPRE_CLKA;
+	pwm_opts.ul_period = 100; //20ms period
+	pwm_opts.ul_duty = 0;
+	pwm_opts.channel = PWM_CHANNEL_0;
+	pmc_enable_periph_clk(ID_PWM);
+	pwm_channel_disable(PWM, PWM_CHANNEL_0);
+	pwm_init( PWM, &pwm_clock_opts );
+	pwm_channel_init( PWM, &pwm_opts );
+	pwm_channel_enable( PWM, PWM_CHANNEL_0 );
+	// ---
+	
 	SysTick_Config(F_CPU/1000);
 	uint32_t  Timeout = MS_Timer + 1000;
 
@@ -157,7 +176,11 @@ int main (void)
 			Timeout += 1000;  // Repeat this timeout in 500 milliseconds
 			readADC();
 			SPIdataBlock();
-			ioport_toggle_pin_level(PIN_LEDK8);	
+			ioport_toggle_pin_level(PIN_LEDK8);
+			uint32_t duty;
+			duty += 5;
+			if (duty > 70) duty = 0;
+			pwm_channel_update_duty( PWM, &pwm_opts, duty );	
 		}
 		
 		//XO3_WriteByte(0x00000800, 0xF);

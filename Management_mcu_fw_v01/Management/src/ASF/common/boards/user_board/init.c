@@ -68,6 +68,12 @@ void board_init(void)
 	ioport_set_port_mode(IOPORT_PIOA, PIO_PA9A_URXD0 | PIO_PA10A_UTXD0, IOPORT_MODE_MUX_A);
 	ioport_disable_port(IOPORT_PIOA, PIO_PA9A_URXD0 | PIO_PA10A_UTXD0);
 	
+	// Configure PWM FAN
+	ioport_set_pin_dir(PIN_FAN_DAC, IOPORT_DIR_OUTPUT); // Led Amber
+	ioport_set_pin_level(PIN_FAN_DAC, IOPORT_PIN_LEVEL_LOW);
+	pio_configure_pin(PWM_FAN, PIO_TYPE_PIO_PERIPH_B);
+
+	
 	// SPI
 	gpio_configure_pin(SPI_MISO_GPIO, SPI_MISO_FLAGS);
 	gpio_configure_pin(SPI_MOSI_GPIO, SPI_MOSI_FLAGS);

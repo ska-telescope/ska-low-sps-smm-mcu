@@ -83,9 +83,11 @@
 //! [tc_define_irq_handler]
 
 // ---------- Fan Management ----------
-#define PIN_RPM1 PIO_PA0_IDX
-#define PIN_RMP2 PIO_PA1_IDX
-#define PIN_FAN	 PIO_PA2_IDX
+//#define PIN_RPM1 PIO_PA0_IDX
+//#define PIN_RMP2 PIO_PA1_IDX
+//#define PIN_FAN	 PIO_PA2_IDX
+#define PIN_FAN_DAC PIO_PB13_IDX
+#define PWM_FAN IOPORT_CREATE_PIN(PIOA, 23)
 
 // ---------- I2C ----------
 /*#define I2C1_SDA PIO_PA3_IDX // TWI0
