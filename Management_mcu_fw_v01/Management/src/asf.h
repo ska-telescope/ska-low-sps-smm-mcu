@@ -114,9 +114,9 @@
 
 // From module: TWI - Two-Wire Interface - SAM implementation
 #include <sam_twi/twi_master.h>
-#include <sam_twi/twi_slave.h>
+//#include <sam_twi/twi_slave.h>
 #include <twi_master.h>
-#include <twi_slave.h>
+//#include <twi_slave.h>
 
 // From module: TWI - Two-wire Interface
 #include <twi.h>

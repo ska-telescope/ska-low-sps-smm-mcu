@@ -83,17 +83,19 @@
 //! [tc_define_irq_handler]
 
 // ---------- Fan Management ----------
-//#define PIN_RPM1 PIO_PA0_IDX
+#define PIN_FAN_RPM PIO_PA26_IDX
 //#define PIN_RMP2 PIO_PA1_IDX
-//#define PIN_FAN	 PIO_PA2_IDX
 #define PIN_FAN_DAC PIO_PB13_IDX
 #define PWM_FAN IOPORT_CREATE_PIN(PIOA, 23)
 
 // ---------- I2C ----------
-/*#define I2C1_SDA PIO_PA3_IDX // TWI0
+/*#ifndef CONF_BOARD_TWI0
+#define CONF_BOARD_TWI0
+#endif*/
+#define I2C1_SDA (PIO_PA3_IDX) // TWI0 SDA
 #define I2C1_SDA_FLAGS (PIO_PERIPH_A | PIO_DEFAULT)
-#define I2C1_SCL PIO_PA4_IDX // TWI0
-#define I2C1_SCL_FLAGS (PIO_PERIPH_A | PIO_DEFAULT)*/
+#define I2C1_SCL (PIO_PA4_IDX) // TWI0 SCL
+#define I2C1_SCL_FLAGS (PIO_PERIPH_A | PIO_DEFAULT)
 
 // ---------- GPIO ----------
 #define XO3_REFRESH PIO_PA6_IDX
@@ -159,6 +161,11 @@
 #define ADC_BUCK2TEMP ADC_CHANNEL_14
 
 #define ADC_INT_TEMP	ADC_TEMPERATURE_SENSOR
+
+// I2C
+// #define TWI_CLK 400000
+// #define ADD_MAC_EEPROM_1 0x50
+
 
 
 #endif /* CONF_BOARD_H_INCLUDED */

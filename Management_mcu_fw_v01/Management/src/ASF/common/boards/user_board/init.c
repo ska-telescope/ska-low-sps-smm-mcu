@@ -69,9 +69,10 @@ void board_init(void)
 	ioport_disable_port(IOPORT_PIOA, PIO_PA9A_URXD0 | PIO_PA10A_UTXD0);
 	
 	// Configure PWM FAN
-	ioport_set_pin_dir(PIN_FAN_DAC, IOPORT_DIR_OUTPUT); // Led Amber
+	ioport_set_pin_dir(PIN_FAN_DAC, IOPORT_DIR_OUTPUT);
 	ioport_set_pin_level(PIN_FAN_DAC, IOPORT_PIN_LEVEL_LOW);
 	pio_configure_pin(PWM_FAN, PIO_TYPE_PIO_PERIPH_B);
+	ioport_set_pin_dir(PIN_FAN_RPM, IOPORT_DIR_INPUT);
 
 	
 	// SPI
@@ -81,6 +82,13 @@ void board_init(void)
 	gpio_configure_pin(SPI_NPCS0_GPIO, SPI_NPCS0_FLAGS);
 	
 	// I2C
+	ioport_set_pin_dir(I2C1_SDA, IOPORT_DIR_INPUT);
+	ioport_set_pin_dir(I2C1_SCL, IOPORT_DIR_INPUT);
 	/*gpio_configure_pin(I2C1_SDA, I2C1_SDA_FLAGS);
-	gpio_configure_pin(I2C1_SCL, I2C1_SCL_FLAGS);*/
+	gpio_configure_pin(I2C1_SCL, I2C1_SCL_FLAGS);*/ //Use the TWI from the FPGA!!!
+	
+	ioport_set_pin_dir(XO3_REFRESH, IOPORT_DIR_OUTPUT);
+	ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
+	
+	
 }

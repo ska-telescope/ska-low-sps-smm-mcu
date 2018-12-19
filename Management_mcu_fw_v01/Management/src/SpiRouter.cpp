@@ -18,20 +18,17 @@
 #include <memory.h>
 #include <string.h>
 
-//#include "MLC150.h"
 #include <SpiRouter.h>
 #include <asf.h>
 
 // Registers
-#include "intctrl.h"
-#include "mdio.h"
-#include "onewire.h"
-#include "regfile.h"
-#include "sam.h"
-#include "uart.h"
-
-//#include "Arduino.h"
-//#include <SPI.h>
+// #include "intctrl.h"
+// #include "mdio.h"
+// #include "onewire.h"
+// #include "regfile.h"
+// #include "sam.h"
+// #include "uart.h"
+#include "FPGA_RegFiles.h"
 
 #define MYSPI			SPI
 
