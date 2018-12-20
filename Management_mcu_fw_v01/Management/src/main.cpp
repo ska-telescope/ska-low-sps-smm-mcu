@@ -231,6 +231,16 @@ int main (void)
 			pwm_channel_update_duty( PWM, &pwm_opts, duty );
 // 			ioport_toggle_pin_level(I2C1_SDA);
 // 			ioport_toggle_pin_level(I2C1_SCL);
+
+			int status, status2;
+			uint32_t mac1, mac2, mac3, mac4, mac5, mac6;
+			//status = twiFpgaRead8(0xA0, 0xFA, &mac8, i2c1);
+			//status = twiFpgaWrite(0xA0, 1, 1, 0xFA, &mac1, i2c1);
+			//status2 = twiFpgaWrite(0xA0, 1, 1, 0xFB, &mac2, i2c1);
+			
+			//MS_Timer
+			XO3_WriteByte(sam_user_gp0 + sam_offset, MS_Timer);
+			
 		}
 		//ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
 		//XO3_WriteByte(0x00000800, 0xF);
@@ -241,31 +251,30 @@ int main (void)
 		//delay_ms(1000);
 		
 		uint32_t mac1, mac2, mac3, mac4, mac5, mac6;
+		uint8_t mac8;
+		volatile uint8_t mac9;
 		//uint32_t dato4;
 		//uint32_t dato8;
-		int status;
-		status = twiFpgaWrite(0xA0, 1, 1, 0xFA, &mac1);
-		twiFpgaWrite(0xA0, 1, 1, 0xFB, &mac2);
-		twiFpgaWrite(0xA0, 1, 1, 0xFC, &mac3);
-		twiFpgaWrite(0xA0, 1, 1, 0xFD, &mac4);
-		twiFpgaWrite(0xA0, 1, 1, 0xFE, &mac5);
-		twiFpgaWrite(0xA0, 1, 1, 0xFF, &mac6);
+		
+// 		twiFpgaWrite(0xA0, 1, 1, 0xFC, &mac3, i2c1);
+// 		twiFpgaWrite(0xA0, 1, 1, 0xFD, &mac4, i2c1);
+// 		twiFpgaWrite(0xA0, 1, 1, 0xFE, &mac5, i2c1);
+// 		twiFpgaWrite(0xA0, 1, 1, 0xFF, &mac6, i2c1);
 		//XO3_WriteByte(regfile_user_reg0, _build_hour);
 		//XO3_Read(sam_mcufw_build_date+sam_offset, &dato);
 		//XO3_Read(regfile_user_reg0, &dato4);
 		//XO3_Read(0x00000008, &dato8);
 		
-		uint64_t macfi;
+		//uint64_t macfi;
 		
-		macfi = mac6;
-		macfi = mac5 << 8;
-		macfi = mac4 << 16;
-		macfi = mac3 << 24;
-		macfi = mac2 << 32;
-		macfi = mac1 << 40;
-		
-		
-		asm("nop");
+// 		macfi = mac6;
+// 		macfi = mac5 << 8;
+// 		macfi = mac4 << 16;
+// 		macfi = mac3 << 24;
+// 		macfi = mac2 << 32;
+// 		macfi = mac1 << 40;
+// 		
+ 		
 			
 		
 		//XO3_Read(regfile_user_reg0, &dato);
