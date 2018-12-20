@@ -104,8 +104,10 @@
 #define PIN_LEDK8 PIO_PA25_IDX
 #define PIN_LEDTB PIO_PC23_IDX
 
-//#define IMX_INT4 PIO_PA25_IDX
-//#define IMX_INT5 PIO_PA26_IDX
+#define IMX_TWIBUSY_N PIO_PA24_IDX // Interrupt from iMX6, low to block TWI
+#define IMX_TWIBUSY_N_FLAGS       (PIO_PERIPH_A | PIO_PULLUP)
+
+//#define IMX_INT5 PIO_PA25_IDX
 // Nand GPIO, used as normal GPIO
 #define XO3_PRESENT PIO_PA29_IDX
 

@@ -90,5 +90,6 @@ void board_init(void)
 	ioport_set_pin_dir(XO3_REFRESH, IOPORT_DIR_OUTPUT);
 	ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
 	
-	
+	// Interrupt from iMX6, low to block TWI
+	ioport_set_pin_dir(IMX_TWIBUSY_N, IOPORT_DIR_INPUT);
 }

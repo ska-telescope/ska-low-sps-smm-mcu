@@ -34,6 +34,8 @@
 #define uart_offset		0x00070000
 //#define fram_offset		0x00090000 //4 KB
 
+//#define ENABLE_IMX_TWI_INTERRUPT
+bool iMX_use_TWI = false;
 
 const uint32_t _build_version = 0xb0000001;
 const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
@@ -59,6 +61,28 @@ pwm_channel_t pwm_opts;
 volatile uint32_t MS_Timer = 0;
 void SysTick_Handler(void) {
 	MS_Timer++;                // Increment global millisecond timer
+}
+
+void pin_edge_handler(const uint32_t id, const uint32_t index)
+{
+	if ((id == ID_PIOA) && (index == IMX_TWIBUSY_N)){
+		if (ioport_get_pin_level(IMX_TWIBUSY_N)){
+			iMX_use_TWI = true;
+		}
+		else {
+			iMX_use_TWI = false;
+		}
+	}
+}
+
+void setup_interupts(void){
+	pmc_enable_periph_clk(ID_PIOA);
+
+	pio_set_input(PIOA, IMX_TWIBUSY_N, PIO_PULLUP);
+	pio_set_debounce_filter(PIOA,  IMX_TWIBUSY_N, 20);
+	pio_handler_set(PIOA, ID_PIOA, IMX_TWIBUSY_N, PIO_IT_EDGE, pin_edge_handler);
+	pio_enable_interrupt(PIOA, IMX_TWIBUSY_N);
+	NVIC_EnableIRQ(PIOA_IRQn);
 }
 
 /* ----------------------------------------- ADC SP Start --- */
@@ -179,7 +203,12 @@ int main (void)
 	SysTick_Config(F_CPU/1000);
 	uint32_t  Timeout = MS_Timer + 1000;
 	
+#ifdef ENABLE_IMX_TWI_INTERRUPT
+	setup_interupts();
+#endif
+#ifdef DEBUG	
 	XO3_refresh(2);
+#endif
 	adc_start(ADC);
 	/* Insert application code here, after the board has been initialized. */
 	
