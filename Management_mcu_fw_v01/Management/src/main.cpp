@@ -177,20 +177,33 @@ int XO3_refresh (int state)
 
 void SPIdataBlock(void){
 	// Voltages
-	XO3_WriteByte(sam_voltage_soc + sam_offset, voltages[0]);
-	XO3_WriteByte(sam_voltage_arm + sam_offset, voltages[1]);
-	XO3_WriteByte(sam_voltage_ddr + sam_offset, voltages[2]);
-	XO3_WriteByte(sam_voltage_v25 + sam_offset, voltages[3]);
-	XO3_WriteByte(sam_voltage_v1 + sam_offset, voltages[4]);
-	XO3_WriteByte(sam_voltage_v11 + sam_offset, voltages[5]);
-	XO3_WriteByte(sam_voltage_vcore + sam_offset, voltages[6]);
-	XO3_WriteByte(sam_voltage_v15 + sam_offset, voltages[7]);
-	XO3_WriteByte(sam_voltage_v33 + sam_offset, voltages[8]);
-	XO3_WriteByte(sam_voltage_v5 + sam_offset, voltages[9]);
-	XO3_WriteByte(sam_voltage_v3 + sam_offset, voltages[10]);
-	XO3_WriteByte(sam_voltage_v28 + sam_offset, voltages[11]);
+// 	XO3_WriteByte(sam_voltage_soc + sam_offset, voltages[0]);
+// 	XO3_WriteByte(sam_voltage_arm + sam_offset, voltages[1]);
+// 	XO3_WriteByte(sam_voltage_ddr + sam_offset, voltages[2]);
+// 	XO3_WriteByte(sam_voltage_v25 + sam_offset, voltages[3]);
+// 	XO3_WriteByte(sam_voltage_v1 + sam_offset, voltages[4]);
+// 	XO3_WriteByte(sam_voltage_v11 + sam_offset, voltages[5]);
+// 	XO3_WriteByte(sam_voltage_vcore + sam_offset, voltages[6]);
+// 	XO3_WriteByte(sam_voltage_v15 + sam_offset, voltages[7]);
+// 	XO3_WriteByte(sam_voltage_v33 + sam_offset, voltages[8]);
+// 	XO3_WriteByte(sam_voltage_v5 + sam_offset, voltages[9]);
+// 	XO3_WriteByte(sam_voltage_v3 + sam_offset, voltages[10]);
+// 	XO3_WriteByte(sam_voltage_v28 + sam_offset, voltages[11]);
+	XO3_WriteByte(sam_voltage_soc + sam_offset, uint32_t(voltagesnorm[0]));
+	XO3_WriteByte(sam_voltage_arm + sam_offset, uint32_t(voltagesnorm[1]));
+	XO3_WriteByte(sam_voltage_ddr + sam_offset, uint32_t(voltagesnorm[2]));
+	XO3_WriteByte(sam_voltage_v25 + sam_offset, uint32_t(voltagesnorm[3]));
+	XO3_WriteByte(sam_voltage_v1 + sam_offset, uint32_t(voltagesnorm[4]));
+	XO3_WriteByte(sam_voltage_v11 + sam_offset, uint32_t(voltagesnorm[5]));
+	XO3_WriteByte(sam_voltage_vcore + sam_offset, uint32_t(voltagesnorm[6]));
+	XO3_WriteByte(sam_voltage_v15 + sam_offset, uint32_t(voltagesnorm[7]));
+	XO3_WriteByte(sam_voltage_v33 + sam_offset, uint32_t(voltagesnorm[8]));
+	XO3_WriteByte(sam_voltage_v5 + sam_offset, uint32_t(voltagesnorm[9]));
+	XO3_WriteByte(sam_voltage_v3 + sam_offset, uint32_t(voltagesnorm[10]));
+	XO3_WriteByte(sam_voltage_v28 + sam_offset, uint32_t(voltagesnorm[11]));
+
 	// Temperatures
-	XO3_WriteByte(sam_temp_Buck + sam_offset, buck2temp);
+	XO3_WriteByte(sam_temp_Buck + sam_offset, uint32_t(buck2tempnorm));
 	//XO3_WriteByte(sam_temp_MCU, xxx);
 }
 
@@ -208,6 +221,9 @@ int main (void)
 #endif
 #ifdef DEBUG	
 	XO3_refresh(2);
+ 	for (uint32_t i = 0; i < 0xffff; i++){
+ 		asm("nop");
+ 	}
 #endif
 	adc_start(ADC);
 	/* Insert application code here, after the board has been initialized. */
@@ -222,11 +238,13 @@ int main (void)
 	spi_master_setup_device(MYSPI, &device, spi_flags,	SPI_CLOCK_SPEED, spi_select_id);
 	spi_enable(MYSPI);
 	spi_enable_clock(MYSPI);
+	uint32_t vers;
+	XO3_Read(regfile_fw_version + regfile_offset, &vers);
 	
 	XO3_WriteByte(sam_mcufw_build_version + sam_offset, _build_version);
 	XO3_WriteByte(sam_mcufw_build_time + sam_offset, _build_time);
 	XO3_WriteByte(sam_mcufw_build_date + sam_offset, _build_date);
-	uint32_t vers;
+	
 	XO3_Read(sam_mcufw_build_version + sam_offset, &vers);
 	readADC(); // Drop first read
 	
@@ -251,7 +269,7 @@ int main (void)
 		//delay_ms(250);
 		if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
 			Timeout += 1000;  // Repeat this timeout in 1000 milliseconds
-			readADC();
+			readADCnormalized();
 			SPIdataBlock();
 			ioport_toggle_pin_level(PIN_LEDK8);
 			uint32_t duty;
@@ -269,6 +287,7 @@ int main (void)
 			
 			//MS_Timer
 			XO3_WriteByte(sam_user_gp0 + sam_offset, MS_Timer);
+			XO3_WriteByte(sam_user_gp1 + sam_offset, 0x1);
 			
 		}
 		//ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
