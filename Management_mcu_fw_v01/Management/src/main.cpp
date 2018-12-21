@@ -55,6 +55,7 @@ uint32_t voltages[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };
 const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0.9763, 0.4395, 0.9763, 1.4793, 0.8766, 0.8284 };
 float buck2tempnorm = 0;
 uint32_t buck2temp = 0;
+uint32_t internalTemp = 0;
 
 pwm_channel_t pwm_opts;
 
@@ -105,6 +106,13 @@ void readADCnormalized(void) // Normalized with R divider value
 		voltagesnorm[x] = (adc_value * voltagesMot[x]);
 		x++;
 	}
+	
+	for(int i=0; i < 10; i++)
+	adc_value += adc_get_channel_value(ADC,  (enum adc_channel_num_t)15);
+	adc_value /= 10;
+	internalTemp = uint32_t(adc_value);
+	
+	
 	buck2tempnorm += adc_get_channel_value(ADC, ADC_BUCK2TEMP); // Temp Buck 2 temp
 	buck2tempnorm = ((buck2tempnorm * 0.4395) + 19) / 6.75;
 	return;
@@ -129,6 +137,7 @@ void readADC(void) // Pure ADC value
 		voltages[x] = (adc_value);
 		x++;
 	}
+	
 	buck2temp += adc_get_channel_value(ADC, ADC_BUCK2TEMP); // Temp Buck 2 temp
 	//buck2temp = ((buck2temp * 0.4395) + 19) / 6.75;
 	return;
@@ -204,6 +213,7 @@ void SPIdataBlock(void){
 
 	// Temperatures
 	XO3_WriteByte(sam_temp_Buck + sam_offset, uint32_t(buck2tempnorm));
+	XO3_WriteByte(sam_temp_MCU + sam_offset, internalTemp);
 	//XO3_WriteByte(sam_temp_MCU, xxx);
 }
 
@@ -226,6 +236,7 @@ int main (void)
  	}
 #endif
 	adc_start(ADC);
+	adc_enable_ts(ADC);
 	/* Insert application code here, after the board has been initialized. */
 	
 	spi_flags_t spi_flags = SPI_MODE_0;
