@@ -568,6 +568,12 @@
     <Compile Include="src\ASF\common\services\spi\sam_spi\spi_master.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\libs\ADT7408.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\libs\ADT7408.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\libs\LTC4281.h">
       <SubType>compile</SubType>
     </Compile>

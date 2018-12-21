@@ -257,7 +257,7 @@ int main (void)
 	XO3_WriteByte(sam_mcufw_build_date + sam_offset, _build_date);
 	
 	XO3_Read(sam_mcufw_build_version + sam_offset, &vers);
-	readADC(); // Drop first read
+	readADCnormalized(); // Drop first read
 	
 	// PWM
 	pwm_clock_t pwm_clock_opts = {
@@ -290,12 +290,7 @@ int main (void)
 // 			ioport_toggle_pin_level(I2C1_SDA);
 // 			ioport_toggle_pin_level(I2C1_SCL);
 
-			int status, status2;
-			uint32_t mac1, mac2, mac3, mac4, mac5, mac6;
-			//status = twiFpgaRead8(0xA0, 0xFA, &mac8, i2c1);
-			//status = twiFpgaWrite(0xA0, 1, 1, 0xFA, &mac1, i2c1);
-			//status2 = twiFpgaWrite(0xA0, 1, 1, 0xFB, &mac2, i2c1);
-			
+
 			//MS_Timer
 			XO3_WriteByte(sam_user_gp0 + sam_offset, MS_Timer);
 			XO3_WriteByte(sam_user_gp1 + sam_offset, 0x1);
@@ -309,9 +304,7 @@ int main (void)
 		//send_spi(0xF1); // Farlocca
 		//delay_ms(1000);
 		
-		uint32_t mac1, mac2, mac3, mac4, mac5, mac6;
-		uint8_t mac8;
-		volatile uint8_t mac9;
+		
 		//uint32_t dato4;
 		//uint32_t dato8;
 		
@@ -323,16 +316,6 @@ int main (void)
 		//XO3_Read(sam_mcufw_build_date+sam_offset, &dato);
 		//XO3_Read(regfile_user_reg0, &dato4);
 		//XO3_Read(0x00000008, &dato8);
-		
-		//uint64_t macfi;
-		
-// 		macfi = mac6;
-// 		macfi = mac5 << 8;
-// 		macfi = mac4 << 16;
-// 		macfi = mac3 << 24;
-// 		macfi = mac2 << 32;
-// 		macfi = mac1 << 40;
-// 		
  		
 			
 		

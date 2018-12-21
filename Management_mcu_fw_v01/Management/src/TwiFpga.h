@@ -43,5 +43,14 @@ int twiFpgaRead16 (uint8_t ICaddress,
 				   uint16_t* datarx,
 				   twiFPGAadd address
 				   );
+				   
+uint16_t readi2cRegister16 (uint32_t TwiRegister,
+						    uint8_t ICaddress
+							);
+							
+uint16_t writei2cRegister16 (uint32_t TwiRegister,
+							 uint16_t datatx,
+							 uint8_t ICaddress
+							);
 
 #endif /* TWIFPGA_H_ */
