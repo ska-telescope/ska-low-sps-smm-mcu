@@ -38,24 +38,46 @@ int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint
 	return int(statusIN);
 }
 
-int twiFpgaRead8 (uint8_t ICaddress, uint32_t TwiRegister, uint8_t* datarx, twiFPGAadd address)
+uint8_t twiFpgaRead8 (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd address)
 {
 	int status;
 	uint32_t data;
 		
-	status = twiFpgaWrite(ICaddress, RW8BIT, RW8BIT, TwiRegister, &data, address);
+	twiFpgaWrite(ICaddress, R8BIT, R8BIT, TwiRegister, &data, address);
 	
-	*datarx = data;
-	return status;
+	return data;
 }
 
-int twiFpgaRead16 (uint8_t ICaddress, uint32_t TwiRegister, uint16_t* datarx, twiFPGAadd address)
+uint16_t twiFpgaRead16 (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd address)
 {
 	int status;
 	uint32_t data;
 	
-	status = twiFpgaWrite(ICaddress, RW16BIT, RW16BIT, TwiRegister, &data, address);
+	twiFpgaWrite(ICaddress, R16BIT, R16BIT, TwiRegister, &data, address);
 	
-	*datarx = data;
-	return status;
+	return data;
+}
+
+uint8_t twiFpgaWrite8 (uint8_t ICaddress, uint8_t dataOut, uint32_t TwiRegister, twiFPGAadd address)
+{
+	int status;
+	uint32_t data;
+	
+	TwiRegister = (TwiRegister << 8) + dataOut;
+	
+	twiFpgaWrite(ICaddress, W8BIT, W8BIT, TwiRegister, &data, address);
+	
+	return data;
+}
+
+uint16_t twiFpgaWrite16 (uint8_t ICaddress, uint16_t dataOut, uint32_t TwiRegister, twiFPGAadd address)
+{
+	int status;
+	uint32_t data;
+	
+	TwiRegister = (TwiRegister << 16) + dataOut;
+	
+	twiFpgaWrite(ICaddress, W16BIT, W16BIT, TwiRegister, &data, address);
+	
+	return data;
 }

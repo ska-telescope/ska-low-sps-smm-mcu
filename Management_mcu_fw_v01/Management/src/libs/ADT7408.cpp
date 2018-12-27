@@ -22,7 +22,7 @@ void readBoardTemp(uint16_t* Temp1, uint16_t* Temp2, bool* Temp1Regs[3], bool* T
 	volatile float  temp1out, temp2out;
 	
 	
-	twiFpgaRead16(ADT7408_ADDRESS1, ADT7408_REG_TEMPERATURE, &temp1);
+	temp1 = twiFpgaRead16(ADT7408_ADDRESS1, ADT7408_REG_TEMPERATURE, i2c1);
 	//temp1 = readi2cRegister16(ADT7408_REG_TEMPERATURE, ADT7408_ADDRESS1);
 	if (temp1 & ADT7408_ABOVE_CRITICAL) { // Above Critical Flags is setted - DO SOMETHING!!!
 		temp1 = temp1 - ADT7408_ABOVE_CRITICAL;
@@ -49,7 +49,7 @@ void readBoardTemp(uint16_t* Temp1, uint16_t* Temp2, bool* Temp1Regs[3], bool* T
 		temp1out = temp1out / 16 ;
 	}
 	
-	twiFpgaRead16(ADT7408_ADDRESS2, ADT7408_REG_TEMPERATURE, &temp2);
+	temp2 = twiFpgaRead16(ADT7408_ADDRESS2, ADT7408_REG_TEMPERATURE, i2c1);
 	//temp2 = readi2cRegister16(ADT7408_REG_TEMPERATURE, ADT7408_ADDRESS2);
 	if (temp2 & ADT7408_ABOVE_CRITICAL) { // Above Critical Flags is setted - DO SOMETHING!!!
 		temp2 = temp2 - ADT7408_ABOVE_CRITICAL;
@@ -91,7 +91,7 @@ This function read the alarm boundary of temperature sensor 1.
 uint16_t readAlarmTempUpperBoundary1(){
 	volatile uint16_t atub1;
 	volatile float out;
-	atub1 = readi2cRegister16(ADT7408_REG_ALARM_TEMP_UPPER, ADT7408_ADDRESS1);
+	atub1 = twiFpgaRead16(ADT7408_ADDRESS1, ADT7408_REG_ALARM_TEMP_UPPER, i2c1);
 	out = float(atub1)/4;
 	return atub1;
 }
@@ -103,7 +103,7 @@ This function write the alarm boundary of temperature sensor 1.
 */
 void writeAlarmTempUpperBoundary1(uint16_t atub1){
 	atub1 = atub1 << 2;
-	writei2cRegister16(ADT7408_REG_ALARM_TEMP_UPPER, atub1, ADT7408_ADDRESS1);
+	twiFpgaWrite16(ADT7408_ADDRESS1, atub1, ADT7408_REG_ALARM_TEMP_UPPER, i2c1);
 }
 
 /**
@@ -114,7 +114,7 @@ This function read the alarm boundary of temperature sensor 2.
 uint16_t readAlarmTempUpperBoundary2(){
 	volatile uint16_t atub2;
 	volatile float out;
-	atub2 = readi2cRegister16(ADT7408_REG_ALARM_TEMP_UPPER, ADT7408_ADDRESS1);
+	atub2 = twiFpgaRead16(ADT7408_ADDRESS2, ADT7408_REG_ALARM_TEMP_UPPER, i2c1);
 	out = float(atub2)/4;
 	return atub2;
 }
@@ -126,7 +126,7 @@ This function write the alarm boundary of temperature sensor 1.
 */
 void writeAlarmTempUpperBoundary2(uint16_t atub2){
 	atub2 = atub2 << 2;
-	writei2cRegister16(ADT7408_REG_ALARM_TEMP_UPPER, atub2, ADT7408_ADDRESS2);
+	twiFpgaWrite16(ADT7408_ADDRESS2, atub2, ADT7408_REG_ALARM_TEMP_UPPER, i2c1);
 }
 
 /**
@@ -137,8 +137,8 @@ This function read the configuration of board temperature sensors.
 */
 void readADTConfiguration(uint16_t* config1, uint16_t* config2){
 	//volatile uint16_t config1, config2;
-	*config1 = readi2cRegister16(ADT7408_REG_CONFIGURATION, ADT7408_ADDRESS1);
-	*config2 = readi2cRegister16(ADT7408_REG_CONFIGURATION, ADT7408_ADDRESS2);
+	*config1 = twiFpgaRead16(ADT7408_ADDRESS1, ADT7408_REG_CONFIGURATION, i2c1);
+	*config2 = twiFpgaRead16(ADT7408_ADDRESS2, ADT7408_REG_CONFIGURATION, i2c1);
 }
 
 /**
@@ -148,6 +148,6 @@ This function write the configuration of board temperature sensors.
 @returns Void - Return no value.
 */
 void writeADTConfiguration(uint16_t config1, uint16_t config2){
-	writei2cRegister16(ADT7408_REG_CONFIGURATION, config1, ADT7408_ADDRESS1);
-	writei2cRegister16(ADT7408_REG_CONFIGURATION, config2, ADT7408_ADDRESS2);
+	twiFpgaWrite16(ADT7408_ADDRESS1, config1, ADT7408_REG_CONFIGURATION, i2c1);
+	twiFpgaWrite16(ADT7408_ADDRESS2, config2, ADT7408_REG_CONFIGURATION, i2c1);
 }

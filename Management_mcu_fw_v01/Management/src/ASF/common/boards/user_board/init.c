@@ -56,9 +56,9 @@ void board_init(void)
 	
 	// Configure LED
 	ioport_set_pin_dir(PIN_LEDK7, IOPORT_DIR_OUTPUT); // Led Amber
-	ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_LOW);
+	ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_HIGH);
 	ioport_set_pin_dir(PIN_LEDK8, IOPORT_DIR_OUTPUT); // Led Blue
-	ioport_set_pin_level(PIN_LEDK8, IOPORT_PIN_LEVEL_LOW);
+	ioport_set_pin_level(PIN_LEDK8, IOPORT_PIN_LEVEL_HIGH);
 	
 	// Configure GPIO
 	//ioport_set_pin_dir(XO3_REFRESH, IOPORT_DIR_OUTPUT); // Pin XO3_REFRESH - Temp Disabled
@@ -81,15 +81,22 @@ void board_init(void)
 	gpio_configure_pin(SPI_SPCK_GPIO, SPI_SPCK_FLAGS);
 	gpio_configure_pin(SPI_NPCS0_GPIO, SPI_NPCS0_FLAGS);
 	
+	ioport_set_pin_dir(SPI_NPCS1_GPIO, IOPORT_DIR_OUTPUT); // Lock CS1 high
+	ioport_set_pin_level(SPI_NPCS1_GPIO, IOPORT_PIN_LEVEL_HIGH);	
+	ioport_set_pin_dir(SPI_NPCS2_GPIO, IOPORT_DIR_OUTPUT); // Lock CS2 high
+	ioport_set_pin_level(SPI_NPCS2_GPIO, IOPORT_PIN_LEVEL_HIGH);
+	
 	// I2C
-	ioport_set_pin_dir(I2C1_SDA, IOPORT_DIR_INPUT);
-	ioport_set_pin_dir(I2C1_SCL, IOPORT_DIR_INPUT);
+	ioport_set_pin_dir(I2C1_SDA, IOPORT_DIR_INPUT); // Pin in tristate
+	ioport_set_pin_dir(I2C1_SCL, IOPORT_DIR_INPUT); // Pin in tristate
 	/*gpio_configure_pin(I2C1_SDA, I2C1_SDA_FLAGS);
 	gpio_configure_pin(I2C1_SCL, I2C1_SCL_FLAGS);*/ //Use the TWI from the FPGA!!!
 	
+	// XO3 Reset	
 	ioport_set_pin_dir(XO3_REFRESH, IOPORT_DIR_OUTPUT);
 	ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
 	
 	// Interrupt from iMX6, low to block TWI
 	ioport_set_pin_dir(IMX_TWIBUSY_N, IOPORT_DIR_INPUT);
+	ioport_set_pin_mode(IMX_TWIBUSY_N, IOPORT_MODE_PULLUP);
 }

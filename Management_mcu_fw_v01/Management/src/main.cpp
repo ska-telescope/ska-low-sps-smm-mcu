@@ -154,6 +154,7 @@ int XO3_refresh (int state)
 		while (1){
 			if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
 				ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_LOW);
+				ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_HIGH);
 				return 0;
 			}
 		}
@@ -162,6 +163,7 @@ int XO3_refresh (int state)
 		while (1){
 			if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
 				ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
+				ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_LOW);
 				return 1;
 			}
 		}
@@ -170,12 +172,14 @@ int XO3_refresh (int state)
 		while (1){
 			if (((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) && (lowStepDone == false)) { //Timed execution
 				ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_LOW);
+				ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_HIGH);
 				Timeout += 1000;
 				lowStepDone = true;
 			}
 			
 			if (((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) && (lowStepDone == true)) { //Timed execution
 				ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
+				ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_LOW);
 				return 2;
 			}
 		}
@@ -303,24 +307,24 @@ int main (void)
 		//spi_write(SPI_MASTER, 0xf, 0, 1);
 		//send_spi(0xF1); // Farlocca
 		//delay_ms(1000);
-		
-		
+		int status;
+		uint32_t mac1, mac2;
 		//uint32_t dato4;
 		//uint32_t dato8;
 		
-// 		twiFpgaWrite(0xA0, 1, 1, 0xFC, &mac3, i2c1);
-// 		twiFpgaWrite(0xA0, 1, 1, 0xFD, &mac4, i2c1);
+ 		status = twiFpgaWrite(0xA0, 1, 1, 0xFA, &mac1, i2c1);
+// 		twiFpgaWrite(0xA2, 1, 1, 0xFB, &mac2, i2c1);
 // 		twiFpgaWrite(0xA0, 1, 1, 0xFE, &mac5, i2c1);
 // 		twiFpgaWrite(0xA0, 1, 1, 0xFF, &mac6, i2c1);
 		//XO3_WriteByte(regfile_user_reg0, _build_hour);
-		//XO3_Read(sam_mcufw_build_date+sam_offset, &dato);
+		XO3_Read(sam_user_gp0 + sam_offset, &mac2);
 		//XO3_Read(regfile_user_reg0, &dato4);
 		//XO3_Read(0x00000008, &dato8);
  		
 			
 		
 		//XO3_Read(regfile_user_reg0, &dato);
-		ioport_toggle_pin_level(PIN_LEDK7);	
+		ioport_toggle_pin_level(PIO_PB10_IDX);	
 	}
 
 }

@@ -104,7 +104,7 @@
 #define PIN_LEDK8 PIO_PA25_IDX
 #define PIN_LEDTB PIO_PC23_IDX
 
-#define IMX_TWIBUSY_N PIO_PA24_IDX // Interrupt from iMX6, low to block TWI
+#define IMX_TWIBUSY_N PIO_PA27_IDX // Interrupt from iMX6, low to block TWI
 #define IMX_TWIBUSY_N_FLAGS       (PIO_PERIPH_A | PIO_PULLUP)
 
 //#define IMX_INT5 PIO_PA25_IDX
@@ -135,6 +135,9 @@
 /** SPI chip select 0 pin definition. (Only one configuration is possible) */
 #define SPI_NPCS0_GPIO         (PIO_PA11_IDX)
 #define SPI_NPCS0_FLAGS           (PIO_PERIPH_A | PIO_DEFAULT)
+
+#define SPI_NPCS1_GPIO PIO_PA31_IDX
+#define SPI_NPCS2_GPIO PIO_PA30_IDX
 
 /*#define PIN_ECSPI_MISO				(PIO_PA12_IDX)
 #define PIN_ECSPI_MISO_FLAGS        (PIO_PERIPH_A | PIO_PULLUP) //PIO_DEFAULT
