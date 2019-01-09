@@ -26,18 +26,10 @@
 // #include "uart.h"
 #include "FPGA_RegFiles.h"
 
-// Register Base Address
-#define regfile_offset	0x00000000
-//#define twi_offset		0x00010000
-#define intctr_offset	0x00020000
-#define sam_offset		0x00030000
-#define uart_offset		0x00070000
-//#define fram_offset		0x00090000 //4 KB
-
 //#define ENABLE_IMX_TWI_INTERRUPT
 bool iMX_use_TWI = false;
 
-const uint32_t _build_version = 0xb0000001;
+const uint32_t _build_version = 0xd0000001;
 const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -69,9 +61,11 @@ void pin_edge_handler(const uint32_t id, const uint32_t index)
 	if ((id == ID_PIOA) && (index == IMX_TWIBUSY_N)){
 		if (ioport_get_pin_level(IMX_TWIBUSY_N)){
 			iMX_use_TWI = true;
+			ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_LOW);
 		}
 		else {
 			iMX_use_TWI = false;
+			ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_HIGH);
 		}
 	}
 }
@@ -221,6 +215,30 @@ void SPIdataBlock(void){
 	//XO3_WriteByte(sam_temp_MCU, xxx);
 }
 
+void TWIdataBlock(void){
+	if (iMX_use_TWI){ // Stoooop!
+		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C1DEAD);
+		return;
+	}
+	else { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
+		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x00000000);
+		int status;
+		uint32_t mac1;
+		status = twiFpgaWrite(0xA0, 1, 1, 0xFA, &mac1, i2c1); //sam_user_gp3
+	}
+}
+
+void checkInterruptIMX6(void){
+	if (ioport_get_pin_level(IMX_TWIBUSY_N)){
+		iMX_use_TWI = false;
+		ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_HIGH); // All right, TWI free
+	}
+	else {
+		iMX_use_TWI = true;
+		ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_LOW); // Stop TWI, iMX6 request the bus
+	}
+}
+
 int main (void)
 {
 	/* Insert system clock initialization code here*/
@@ -281,11 +299,12 @@ int main (void)
 	// ---
 
 	while (1) {
-		//delay_ms(250);
+		checkInterruptIMX6();
 		if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
 			Timeout += 1000;  // Repeat this timeout in 1000 milliseconds
 			readADCnormalized();
 			SPIdataBlock();
+			TWIdataBlock();
 			ioport_toggle_pin_level(PIN_LEDK8);
 			uint32_t duty;
 			duty += 5;
@@ -307,21 +326,17 @@ int main (void)
 		//spi_write(SPI_MASTER, 0xf, 0, 1);
 		//send_spi(0xF1); // Farlocca
 		//delay_ms(1000);
-		int status;
-		uint32_t mac1, mac2;
-		//uint32_t dato4;
-		//uint32_t dato8;
-		
- 		status = twiFpgaWrite(0xA0, 1, 1, 0xFA, &mac1, i2c1);
-// 		twiFpgaWrite(0xA2, 1, 1, 0xFB, &mac2, i2c1);
+		// 		twiFpgaWrite(0xA2, 1, 1, 0xFB, &mac2, i2c1);
 // 		twiFpgaWrite(0xA0, 1, 1, 0xFE, &mac5, i2c1);
 // 		twiFpgaWrite(0xA0, 1, 1, 0xFF, &mac6, i2c1);
-		//XO3_WriteByte(regfile_user_reg0, _build_hour);
-		XO3_Read(sam_user_gp0 + sam_offset, &mac2);
-		//XO3_Read(regfile_user_reg0, &dato4);
+		
+		uint32_t _build_low, _build_high;
+		XO3_WriteByte(regfile_fw_version + regfile_offset, _build_low);
+		XO3_WriteByte(regfile_fw_build_high + regfile_offset, _build_high);
+		XO3_WriteByte(regfile_pll_reset + regfile_offset, 0x00000000);
+		uint32_t dato;
+		XO3_Read(regfile_pll_reset + regfile_offset, &dato);
 		//XO3_Read(0x00000008, &dato8);
- 		
-			
 		
 		//XO3_Read(regfile_user_reg0, &dato);
 		ioport_toggle_pin_level(PIO_PB10_IDX);	
