@@ -198,6 +198,11 @@
 #define regfile_sam_reset_R	0x00000001
 #define regfile_sam_reset_D	"SAM Reset Status"
 
+#define regfile_sam_pooltime  	0x00000904	//RW
+#define regfile_sam_pooltime_M	0xffffffff
+#define regfile_sam_pooltime_R	0x000001f4
+#define regfile_sam_pooltime_D	"SAM Pooling Time"
+
 #define regfile_user_reg0  	0x00000A00	//RW
 #define regfile_user_reg0_M	0xffffffff
 #define regfile_user_reg0_R	0x00000000
@@ -217,4 +222,3 @@
 #define regfile_user_reg3_M	0xffffffff
 #define regfile_user_reg3_R	0x00000000
 #define regfile_user_reg3_D	"User Register 3"
-
