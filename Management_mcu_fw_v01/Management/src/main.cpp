@@ -3,7 +3,7 @@
  * 
  * V1.0 - 20/03/18 ~ Luca Schettini
  * 
- * Copyright (c) 2017 Sanitas EG srl.  All right reserved.
+ * Copyright (c) 2017-2018 Sanitas EG srl.  All right reserved.
  * 
  */
 
@@ -29,7 +29,7 @@
 //#define ENABLE_IMX_TWI_INTERRUPT
 bool iMX_use_TWI = false;
 
-const uint32_t _build_version = 0xd0000001;
+const uint32_t _build_version = 0xdeb00002;
 const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -247,13 +247,14 @@ int main (void)
 	
 	SysTick_Config(F_CPU/1000);
 	uint32_t  Timeout = MS_Timer + 1000;
+	uint32_t pooling_time = 0;
 	
 #ifdef ENABLE_IMX_TWI_INTERRUPT
 	setup_interupts();
 #endif
 #ifdef DEBUG	
 	XO3_refresh(2);
- 	for (uint32_t i = 0; i < 0xffff; i++){
+ 	for (uint32_t i = 0; i < 0xfffff; i++){
  		asm("nop");
  	}
 #endif
@@ -278,7 +279,8 @@ int main (void)
 	XO3_WriteByte(sam_mcufw_build_time + sam_offset, _build_time);
 	XO3_WriteByte(sam_mcufw_build_date + sam_offset, _build_date);
 	
-	XO3_Read(sam_mcufw_build_version + sam_offset, &vers);
+	XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time);
+	Timeout = MS_Timer + pooling_time;
 	readADCnormalized(); // Drop first read
 	
 	// PWM
@@ -301,7 +303,7 @@ int main (void)
 	while (1) {
 		checkInterruptIMX6();
 		if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
-			Timeout += 1000;  // Repeat this timeout in 1000 milliseconds
+			Timeout += pooling_time;  // Repeat this timeout in 1000 milliseconds
 			readADCnormalized();
 			SPIdataBlock();
 			TWIdataBlock();
@@ -317,7 +319,7 @@ int main (void)
 			//MS_Timer
 			XO3_WriteByte(sam_user_gp0 + sam_offset, MS_Timer);
 			XO3_WriteByte(sam_user_gp1 + sam_offset, 0x1);
-			
+			XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time);			
 		}
 		//ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
 		//XO3_WriteByte(0x00000800, 0xF);
@@ -331,12 +333,12 @@ int main (void)
 // 		twiFpgaWrite(0xA0, 1, 1, 0xFF, &mac6, i2c1);
 		
 		uint32_t _build_low, _build_high;
-		XO3_WriteByte(regfile_fw_version + regfile_offset, _build_low);
-		XO3_WriteByte(regfile_fw_build_high + regfile_offset, _build_high);
-		XO3_WriteByte(regfile_pll_reset + regfile_offset, 0x00000000);
+		//XO3_WriteByte(regfile_fw_version + regfile_offset, _build_low);
+		//XO3_WriteByte(fram_LTC4281_TIME_counter_0 + fram_offset, _build_high);
+		//XO3_WriteByte(regfile_pll_reset + regfile_offset, 0x00000000);
 		uint32_t dato;
-		XO3_Read(regfile_pll_reset + regfile_offset, &dato);
-		//XO3_Read(0x00000008, &dato8);
+		//XO3_Read(fram_LTC4281_TIME_counter_0 + fram_offset, &dato);
+		XO3_Read(regfile_fw_version, &dato);
 		
 		//XO3_Read(regfile_user_reg0, &dato);
 		ioport_toggle_pin_level(PIO_PB10_IDX);	
