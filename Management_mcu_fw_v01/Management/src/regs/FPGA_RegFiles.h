@@ -24,7 +24,7 @@
 #define intctr_offset	0x00020000
 #define sam_offset		0x00030000
 #define uart_offset		0x00070000
-#define fram_offset		0x00090000 //2 KB
+#define fram_offset		0x00090000 //4 KB
 
 
 #endif /* FPGA_REGFILES_H_ */
