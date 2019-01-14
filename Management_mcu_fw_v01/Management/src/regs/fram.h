@@ -106,4 +106,14 @@
 #define fram_LTC3676_PGSTATL						0x00000752 //R  - 8 bit
 #define fram_LTC3676_PGSTATRT						0x00000760 //R  - 8 bit
 
+#define fram_USER8									0x00000770 //RW - 16 bit
+#define fram_USER7									0x00000780 //RW - 16 bit
+#define fram_USER6									0x00000790 //RW - 16 bit
+#define fram_USER5									0x000007A0 //RW - 16 bit
+#define fram_USER4									0x000007B0 //RW - 16 bit
+#define fram_USER3									0x000007C0 //RW - 16 bit
+#define fram_USER2									0x000007D0 //RW - 16 bit
+#define fram_USER1									0x000007E0 //RW - 16 bit
+#define fram_USER0									0x000007F0 //RW - 16 bit
+
 #endif /* FRAM_H_ */
