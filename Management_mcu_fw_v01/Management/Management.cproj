@@ -574,10 +574,10 @@
     <Compile Include="src\libs\ADT7408.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\libs\LTC4281.h">
+    <Compile Include="src\regs\FPGA_RegFiles.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\regs\FPGA_RegFiles.h">
+    <Compile Include="src\regs\fram.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\TwiFpga.cpp">

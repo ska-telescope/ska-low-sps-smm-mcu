@@ -16,6 +16,15 @@
 #include "sam.h"
 #include "uart.h"
 #include "twi_fpga.h"
+#include "fram.h"
+
+// Register Base Address
+#define regfile_offset	0x00000000
+//#define twi_offset		0x00010000
+#define intctr_offset	0x00020000
+#define sam_offset		0x00030000
+#define uart_offset		0x00070000
+#define fram_offset		0x00090000 //4 KB
 
 
 #endif /* FPGA_REGFILES_H_ */
