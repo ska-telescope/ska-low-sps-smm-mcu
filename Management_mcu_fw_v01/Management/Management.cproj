@@ -574,9 +574,6 @@
     <Compile Include="src\libs\ADT7408.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\libs\LTC4281.h">
-      <SubType>compile</SubType>
-    </Compile>
     <Compile Include="src\regs\FPGA_RegFiles.h">
       <SubType>compile</SubType>
     </Compile>
