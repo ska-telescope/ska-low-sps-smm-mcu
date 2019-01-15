@@ -48,6 +48,7 @@ const float voltagesMot[] = { 0.4395, 0.4395, 0.4395, 0.7396, 0.4395,  0.4395, 0
 float buck2tempnorm = 0;
 uint32_t buck2temp = 0;
 uint32_t internalTemp = 0;
+uint32_t duty;
 
 pwm_channel_t pwm_opts;
 
@@ -213,6 +214,10 @@ void SPIdataBlock(void){
 	XO3_WriteByte(sam_temp_Buck + sam_offset, uint32_t(buck2tempnorm));
 	XO3_WriteByte(sam_temp_MCU + sam_offset, internalTemp);
 	//XO3_WriteByte(sam_temp_MCU, xxx);
+	
+	XO3_Read(sam_user_gp2 + sam_offset, &duty); // 0 max - 90 slow/stop
+	if (duty > 99) duty = 99;
+	
 }
 
 void TWIdataBlock(void){
@@ -221,6 +226,7 @@ void TWIdataBlock(void){
 		return;
 	}
 	else { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
+		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C10000);
 		int status;
 		uint32_t retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x30, 1, 2, 0x05, &retvalue, i2c1); //temp_value 0x30
@@ -355,7 +361,7 @@ int main (void)
 	XO3_WriteByte(sam_mcufw_build_version + sam_offset, _build_version);
 	XO3_WriteByte(sam_mcufw_build_time + sam_offset, _build_time);
 	XO3_WriteByte(sam_mcufw_build_date + sam_offset, _build_date);
-	
+	XO3_WriteByte(sam_user_gp2 + sam_offset, 0x0); // Initialize fan speed to max
 	XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time); // ms
 	Timeout = MS_Timer + pooling_time;
 	readADCnormalized(); // Drop first read
@@ -376,7 +382,6 @@ int main (void)
 	pwm_channel_init( PWM, &pwm_opts );
 	pwm_channel_enable( PWM, PWM_CHANNEL_0 );
 	// ---
-
 	while (1) {
 		checkInterruptIMX6();
 		if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
@@ -385,9 +390,8 @@ int main (void)
 			SPIdataBlock();
 			TWIdataBlock();
 			ioport_toggle_pin_level(PIN_LEDK8);
-			uint32_t duty;
-			duty += 5;
-			if (duty > 70) duty = 0;
+// 			duty += 5;
+// 			if (duty > 70) duty = 0;
 			pwm_channel_update_duty( PWM, &pwm_opts, duty );
 // 			ioport_toggle_pin_level(I2C1_SDA);
 // 			ioport_toggle_pin_level(I2C1_SCL);
