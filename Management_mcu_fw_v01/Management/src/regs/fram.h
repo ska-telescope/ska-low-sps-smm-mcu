@@ -128,12 +128,79 @@
 #define fram_ADT7408_B_2_critical_temp_trip			0x00000019C //RW - 16 bit
 #define fram_ADT7408_B_2_temp_val					0x000000200 //RW - 16 bit
 
-#define fram_LTC4281_M_control_1					0x000000030 //RW - 8 bit
-#define fram_LTC4281_M_control_2					0x000000034 //RW - 8 bit
-#define fram_LTC4281_M_alert_1						0x000000038 //RW - 8 bit
-#define fram_LTC4281_M_alert_2						0x00000003C //RW - 8 bit
-#define fram_LTC4281_M_status_0						0x0000000A8 //R  - 8 bit
-#define fram_LTC4281_M_status_1						0x0000000AC //R  - 8 bit
+#define fram_LTC4281_B_1_control					0x000000204 //RW - 16 bit
+#define fram_LTC4281_B_1_alert						0x000000208 //RW - 16 bit
+#define fram_LTC4281_B_1_fault_log					0x00000020C //RW - 8 bit
+#define fram_LTC4281_B_1_ilim_adj					0x000000210 //RW - 8 bit
+#define fram_LTC4281_B_1_Vsource					0x000000214 //R  - 16 bit
+#define fram_LTC4281_B_1_power						0x000000218 //R  - 16 bit
+
+#define fram_LTC4281_B_2_control					0x00000021C //RW - 16 bit
+#define fram_LTC4281_B_2_alert						0x000000220 //RW - 16 bit
+#define fram_LTC4281_B_2_fault_log					0x000000224 //RW - 8 bit
+#define fram_LTC4281_B_2_ilim_adj					0x000000228 //RW - 8 bit
+#define fram_LTC4281_B_2_Vsource					0x00000022C //R  - 16 bit
+#define fram_LTC4281_B_2_power						0x000000230 //R  - 16 bit
+
+#define fram_LTC4281_B_3_control					0x000000234 //RW - 16 bit
+#define fram_LTC4281_B_3_alert						0x000000238 //RW - 16 bit
+#define fram_LTC4281_B_3_fault_log					0x00000023C //RW - 8 bit
+#define fram_LTC4281_B_3_ilim_adj					0x000000240 //RW - 8 bit
+#define fram_LTC4281_B_3_Vsource					0x000000244 //R  - 16 bit
+#define fram_LTC4281_B_3_power						0x000000248 //R  - 16 bit
+
+#define fram_LTC4281_B_4_control					0x00000024C //RW - 16 bit
+#define fram_LTC4281_B_4_alert						0x000000250 //RW - 16 bit
+#define fram_LTC4281_B_4_fault_log					0x000000254 //RW - 8 bit
+#define fram_LTC4281_B_4_ilim_adj					0x000000258 //RW - 8 bit
+#define fram_LTC4281_B_4_Vsource					0x00000025C //R  - 16 bit
+#define fram_LTC4281_B_4_power						0x000000260 //R  - 16 bit
+
+#define fram_LTC4281_B_5_control					0x000000264 //RW - 16 bit
+#define fram_LTC4281_B_5_alert						0x000000268 //RW - 16 bit
+#define fram_LTC4281_B_5_fault_log					0x00000026C //RW - 8 bit
+#define fram_LTC4281_B_5_ilim_adj					0x000000270 //RW - 8 bit
+#define fram_LTC4281_B_5_Vsource					0x000000274 //R  - 16 bit
+#define fram_LTC4281_B_5_power						0x000000278 //R  - 16 bit
+
+#define fram_LTC4281_B_6_control					0x00000027C //RW - 16 bit
+#define fram_LTC4281_B_6_alert						0x000000280 //RW - 16 bit
+#define fram_LTC4281_B_6_fault_log					0x000000284 //RW - 8 bit
+#define fram_LTC4281_B_6_ilim_adj					0x000000288 //RW - 8 bit
+#define fram_LTC4281_B_6_Vsource					0x00000028C //R  - 16 bit
+#define fram_LTC4281_B_6_power						0x000000290 //R  - 16 bit
+
+#define fram_LTC4281_B_7_control					0x000000294 //RW - 16 bit
+#define fram_LTC4281_B_7_alert						0x000000298 //RW - 16 bit
+#define fram_LTC4281_B_7_fault_log					0x00000029C //RW - 8 bit
+#define fram_LTC4281_B_7_ilim_adj					0x000000300 //RW - 8 bit
+#define fram_LTC4281_B_7_Vsource					0x000000304 //R  - 16 bit
+#define fram_LTC4281_B_7_power						0x000000308 //R  - 16 bit
+
+#define fram_LTC4281_B_8_control					0x00000030C //RW - 16 bit
+#define fram_LTC4281_B_8_alert						0x000000310 //RW - 16 bit
+#define fram_LTC4281_B_8_fault_log					0x000000314 //RW - 8 bit
+#define fram_LTC4281_B_8_ilim_adj					0x000000318 //RW - 8 bit
+#define fram_LTC4281_B_8_Vsource					0x00000031C //R  - 16 bit
+#define fram_LTC4281_B_8_power						0x000000320 //R  - 16 bit
+
+// i2c3
+
+#define fram_PSU_0_vout								0x000000324 //R  - 16 bit
+#define fram_PSU_0_iout								0x000000328 //R  - 16 bit
+#define fram_PSU_0_vin								0x00000032C //R  - 16 bit
+#define fram_PSU_0_iin								0x000000330 //R  - 16 bit
+#define fram_PSU_0_status_vout						0x000000334 //R  - 8 bit
+#define fram_PSU_0_status_iout						0x000000338 //R  - 8 bit
+#define fram_PSU_0_fan_speed						0x00000033C //R  - 16 bit
+
+#define fram_PSU_1_vout								0x000000340 //R  - 16 bit
+#define fram_PSU_1_iout								0x000000344 //R  - 16 bit
+#define fram_PSU_1_vin								0x000000348 //R  - 16 bit
+#define fram_PSU_1_iin								0x00000034C //R  - 16 bit
+#define fram_PSU_1_status_vout						0x000000350 //R  - 8 bit
+#define fram_PSU_1_status_iout						0x000000354 //R  - 8 bit
+#define fram_PSU_1_fan_speed						0x000000358 //R  - 16 bit
 
 
 
