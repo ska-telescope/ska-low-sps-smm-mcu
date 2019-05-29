@@ -16,8 +16,22 @@ int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint
 	uint32_t dataIN;
 	uint32_t statusIN; //0x0 ok - 0x1 
 	uint8_t busyRetry = 0;
+	uint8_t tempbyte0, tempbyte1, tempbyte2, tempbyte3;
 	
-	ICaddress = ICaddress >> 1;
+	ICaddress = ICaddress >> 1; // Shift 8bit to 7bit address
+	
+	if ((byte2write > 1) || (address != i2c3)) { // Chiedere ad ale di invertire le scritture
+		tempbyte0 = uint8_t(datatx);
+		tempbyte1 = uint8_t(datatx >> 8);
+		tempbyte2 = uint8_t(datatx >> 16);
+		tempbyte3 = uint8_t(datatx >> 24);
+		datatx = 0x0;
+		
+		if (byte2write == 2) datatx = ((tempbyte0 << 8 ) + tempbyte1);
+		if (byte2write == 3) datatx = ((tempbyte0 << 16) + (tempbyte1 << 8 ) + tempbyte2);
+		if (byte2write == 4) datatx = ((tempbyte0 << 24) + (tempbyte1 << 16) + (tempbyte2 << 8) + tempbyte3);
+	}
+	
 	twi_ctrl_data += (byte2read << 24); // [31:24] byte number to read
 	twi_ctrl_data += (byte2write << 16); // [23:16] byte number to write
 	twi_ctrl_data += (ICaddress); // [9:0] command - [6:0] IC address
@@ -34,6 +48,17 @@ int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint
 	}
 	XO3_Read(twi_offset + tiw_rdata, &dataIN);
 	
+	if ((byte2write > 1) || (address != i2c3)) { // Chiedere ad ale di invertire le letture
+		tempbyte0 = uint8_t(dataIN);
+		tempbyte1 = uint8_t(dataIN >> 8);
+		tempbyte2 = uint8_t(dataIN >> 16);
+		tempbyte3 = uint8_t(dataIN >> 24);
+		dataIN = 0x0;
+		
+		if (byte2read == 2) dataIN = ((tempbyte0 << 8 ) + tempbyte1);
+		if (byte2read == 3) dataIN = ((tempbyte0 << 16) + (tempbyte1 << 8 ) + tempbyte2);
+		if (byte2read == 4) dataIN = ((tempbyte0 << 24) + (tempbyte1 << 16) + (tempbyte2 << 8) + tempbyte3);
+	}
 	
 	*datarx = dataIN;
 	return int(statusIN);
