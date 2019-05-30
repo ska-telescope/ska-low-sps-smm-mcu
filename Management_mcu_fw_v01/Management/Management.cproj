@@ -249,7 +249,7 @@
       </framework-data>
     </AsfFrameworkConfig>
     <avrtool>com.atmel.avrdbg.tool.samice</avrtool>
-    <avrtoolserialnumber>20126333</avrtoolserialnumber>
+    <avrtoolserialnumber>20126405</avrtoolserialnumber>
     <avrdeviceexpectedsignature>0x28AC0AE0</avrdeviceexpectedsignature>
     <custom>
       <ToolOptions>
@@ -296,7 +296,7 @@
         <JlinkConfigFile>F:\SanitasEG\GIT\SKA\MANAGEMENT_MCU_FW\Management_mcu_fw_v01\Management\jlink.config</JlinkConfigFile>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.samice</ToolType>
-      <ToolNumber>20126333</ToolNumber>
+      <ToolNumber>20126405</ToolNumber>
       <ToolName>SAM-ICE</ToolName>
     </com_atmel_avrdbg_tool_samice>
     <ResetRule>0</ResetRule>

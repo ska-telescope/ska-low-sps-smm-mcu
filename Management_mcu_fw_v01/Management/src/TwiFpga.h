@@ -21,6 +21,15 @@
 #define W8BIT		2
 #define W16BIT		4
 
+/*
+ * I2C Addresses - 8bit (7bit)
+ */
+
+// i2c3
+#define IOEXP	0x40 // (0x20)
+#define PSU1	0xB0 // (0x58)
+#define PSU2	0xB2 // (0x59)
+
 typedef enum twiFPGAadd_t {
 	i2c1		    = 0x0,
 	i2c2			= 0x100,
