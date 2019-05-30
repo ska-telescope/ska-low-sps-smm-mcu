@@ -10,6 +10,7 @@
 #include <asf.h>
 #include <string.h>
 #include "conf_board.h"
+#include <math.h>
 
 #include "spi_master.h"
 #include <SpiRouter.h>
@@ -28,8 +29,9 @@
 
 //#define ENABLE_IMX_TWI_INTERRUPT
 bool iMX_use_TWI = false;
+uint8_t twi_block = 0x1;
 
-const uint32_t _build_version = 0xdeb00002;
+const uint32_t _build_version = 0xdeb00004;
 const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -220,106 +222,330 @@ void SPIdataBlock(void){
 	
 }
 
-void TWIdataBlock(void){
-	if (iMX_use_TWI){ // Stoooop!
-		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C1DEAD);
-		return;
-	}
-	else { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
-		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C10000);
-		int status;
-		uint32_t retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x30, 1, 2, 0x05, &retvalue, i2c1); //temp_value 0x30
-		XO3_WriteByte(fram_ADT7408_1_temp_val + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x32, 1, 2, 0x05, &retvalue, i2c1); //temp_value 0x32
-		XO3_WriteByte(fram_ADT7408_2_temp_val + fram_offset, retvalue);
-		
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x04, &retvalue, i2c1); //fault_log 0x88
-		XO3_WriteByte(fram_LTC4281_fault_log + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x12, &retvalue, i2c1); //energy0 0x88
-		XO3_WriteByte(fram_LTC4281_energy_0 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x13, &retvalue, i2c1); //energy1 0x88
-		XO3_WriteByte(fram_LTC4281_energy_1 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x14, &retvalue, i2c1); //energy2 0x88
-		XO3_WriteByte(fram_LTC4281_energy_2 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x15, &retvalue, i2c1); //energy3 0x88
-		XO3_WriteByte(fram_LTC4281_energy_3 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x16, &retvalue, i2c1); //energy4 0x88
-		XO3_WriteByte(fram_LTC4281_energy_4 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x17, &retvalue, i2c1); //energy5 0x88
-		XO3_WriteByte(fram_LTC4281_energy_5 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x18, &retvalue, i2c1); //time_count0 0x88
-		XO3_WriteByte(fram_LTC4281_TIME_counter_0 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x19, &retvalue, i2c1); //time_count1 0x88
-		XO3_WriteByte(fram_LTC4281_TIME_counter_1 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x1A, &retvalue, i2c1); //time_count2 0x88
-		XO3_WriteByte(fram_LTC4281_TIME_counter_2 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x1B, &retvalue, i2c1); //time_count3 0x88
-		XO3_WriteByte(fram_LTC4281_TIME_counter_3 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x1E, &retvalue, i2c1); //status0 0x88
-		XO3_WriteByte(fram_LTC4281_status_0 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x1F, &retvalue, i2c1); //status1 0x88
-		XO3_WriteByte(fram_LTC4281_status_1 + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x34, &retvalue, i2c1); //vgpio_msb 0x88
-		XO3_WriteByte(fram_LTC4281_VGPIO_msb + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x35, &retvalue, i2c1); //vgpio_lsb 0x88
-		XO3_WriteByte(fram_LTC4281_VGPIO_lsb + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x3A, &retvalue, i2c1); //VSOURCE_msb 0x88
-		XO3_WriteByte(fram_LTC4281_VSOURCE_msb + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x3B, &retvalue, i2c1); //VSOURCE_lsb 0x88
-		XO3_WriteByte(fram_LTC4281_VSOURCE_lsb + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x40, &retvalue, i2c1); //VSENSE_msb 0x88
-		XO3_WriteByte(fram_LTC4281_VSENSE_msb + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x41, &retvalue, i2c1); //VSENSE_lsb 0x88
-		XO3_WriteByte(fram_LTC4281_VSENSE_lsb + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x46, &retvalue, i2c1); //POWER_msb 0x88
-		XO3_WriteByte(fram_LTC4281_POWER_msb + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x88, 1, 1, 0x47, &retvalue, i2c1); //POWER_msb 0x88
-		XO3_WriteByte(fram_LTC4281_POWER_lsb + fram_offset, retvalue);
-		
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x78, 1, 1, 0x13, &retvalue, i2c1); //MSKPG 0x78
-		XO3_WriteByte(fram_LTC3676_MSKPG + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x78, 1, 1, 0x15, &retvalue, i2c1); //IRQSTAT 0x78
-		XO3_WriteByte(fram_LTC3676_IRQSTAT + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0x78, 1, 1, 0x17, &retvalue, i2c1); //PGSTATRT 0x78
-		XO3_WriteByte(fram_LTC3676_PGSTATRT + fram_offset, retvalue);
-	}
-}
-
-void checkInterruptIMX6(void){
+bool checkInterruptIMX6(void){
 	if (ioport_get_pin_level(IMX_TWIBUSY_N)){
 		iMX_use_TWI = false;
 		ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_HIGH); // All right, TWI free
+		return false;
 	}
 	else {
 		iMX_use_TWI = true;
+		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C0DEAD);
 		ioport_set_pin_level(PIN_LEDK7, IOPORT_PIN_LEVEL_LOW); // Stop TWI, iMX6 request the bus
+		return true;
 	}
+}
+
+void TWIdataBlock(void){
+	int status;
+	uint32_t retvalue = 0xffffffff;
+	float voltage, amperage, power, powerc;
+	
+	if ((checkInterruptIMX6() == false) && (twi_block == 0x1)) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
+		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C10000);
+
+		// i2c1
+		status = twiFpgaWrite(0x30, 1, 2, 0x05, &retvalue, i2c1); //temp_value 0x30
+		XO3_WriteByte(fram_ADT7408_M_1_temp_val + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x32, 1, 2, 0x05, &retvalue, i2c1); //temp_value 0x32
+		XO3_WriteByte(fram_ADT7408_M_2_temp_val + fram_offset, retvalue);	
+		retvalue = 0xffffffff;
+		
+		status = twiFpgaWrite(0x88, 1, 1, 0x04, &retvalue, i2c1); //fault_log 0x88
+		XO3_WriteByte(fram_LTC4281_M_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x12, &retvalue, i2c1); //energy0 0x88
+		XO3_WriteByte(fram_LTC4281_M_energy_0 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x13, &retvalue, i2c1); //energy1 0x88
+		XO3_WriteByte(fram_LTC4281_M_energy_1 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x14, &retvalue, i2c1); //energy2 0x88
+		XO3_WriteByte(fram_LTC4281_M_energy_2 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x15, &retvalue, i2c1); //energy3 0x88
+		XO3_WriteByte(fram_LTC4281_M_energy_3 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x16, &retvalue, i2c1); //energy4 0x88
+		XO3_WriteByte(fram_LTC4281_M_energy_4 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x17, &retvalue, i2c1); //energy5 0x88
+		XO3_WriteByte(fram_LTC4281_M_energy_5 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x18, &retvalue, i2c1); //time_count0 0x88
+		XO3_WriteByte(fram_LTC4281_M_TIME_counter_0 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x19, &retvalue, i2c1); //time_count1 0x88
+		XO3_WriteByte(fram_LTC4281_M_TIME_counter_1 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x1A, &retvalue, i2c1); //time_count2 0x88
+		XO3_WriteByte(fram_LTC4281_M_TIME_counter_2 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x1B, &retvalue, i2c1); //time_count3 0x88
+		XO3_WriteByte(fram_LTC4281_M_TIME_counter_3 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x1E, &retvalue, i2c1); //status0 0x88
+		XO3_WriteByte(fram_LTC4281_M_status_0 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x1F, &retvalue, i2c1); //status1 0x88
+		XO3_WriteByte(fram_LTC4281_M_status_1 + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x34, &retvalue, i2c1); //vgpio_msb 0x88
+		XO3_WriteByte(fram_LTC4281_M_VGPIO_msb + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x35, &retvalue, i2c1); //vgpio_lsb 0x88
+		XO3_WriteByte(fram_LTC4281_M_VGPIO_lsb + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x3A, &retvalue, i2c1); //VSOURCE_msb 0x88
+		XO3_WriteByte(fram_LTC4281_M_VSOURCE_msb + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x3B, &retvalue, i2c1); //VSOURCE_lsb 0x88
+		XO3_WriteByte(fram_LTC4281_M_VSOURCE_lsb + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x40, &retvalue, i2c1); //VSENSE_msb 0x88
+		XO3_WriteByte(fram_LTC4281_M_VSENSE_msb + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x41, &retvalue, i2c1); //VSENSE_lsb 0x88
+		XO3_WriteByte(fram_LTC4281_M_VSENSE_lsb + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x46, &retvalue, i2c1); //POWER_msb 0x88
+		XO3_WriteByte(fram_LTC4281_M_POWER_msb + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x47, &retvalue, i2c1); //POWER_msb 0x88
+		XO3_WriteByte(fram_LTC4281_M_POWER_lsb + fram_offset, retvalue);
+		
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x78, 1, 1, 0x13, &retvalue, i2c1); //MSKPG 0x78
+		XO3_WriteByte(fram_LTC3676_M_MSKPG + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x78, 1, 1, 0x15, &retvalue, i2c1); //IRQSTAT 0x78
+		XO3_WriteByte(fram_LTC3676_M_IRQSTAT + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x78, 1, 1, 0x17, &retvalue, i2c1); //PGSTATRT 0x78
+		XO3_WriteByte(fram_LTC3676_M_PGSTATRT + fram_offset, retvalue);
+		
+		twi_block = 0x2;
+	}
+	if ((checkInterruptIMX6() == false) && (twi_block == 0x2)) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
+		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C20000);
+		
+		// TWI2 - Backplane
+		status = twiFpgaWrite(0x80, 1, 2, 0x00, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_1_control + fram_offset, retvalue);
+		retvalue = 0xffffffff;		
+		status = twiFpgaWrite(0x80, 1, 2, 0x02, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_1_alert + fram_offset, retvalue);
+		retvalue = 0xffffffff;		
+		status = twiFpgaWrite(0x80, 1, 1, 0x04, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_1_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;		
+		status = twiFpgaWrite(0x80, 1, 1, 0x11, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_1_ilim_adj + fram_offset, retvalue);
+		retvalue = 0xffffffff;		
+		status = twiFpgaWrite(0x80, 1, 2, 0x3A, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_1_Vsource + fram_offset, retvalue);
+		retvalue = 0xffffffff;		
+		status = twiFpgaWrite(0x80, 1, 2, 0x46, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_1_power + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		status = twiFpgaWrite(0x82, 1, 2, 0x00, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_2_control + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x82, 1, 2, 0x02, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_2_alert + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x82, 1, 1, 0x04, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_2_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x82, 1, 1, 0x11, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_2_ilim_adj + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x82, 1, 2, 0x3A, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_2_Vsource + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x82, 1, 2, 0x46, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_2_power + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		status = twiFpgaWrite(0x84, 1, 2, 0x00, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_3_control + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x84, 1, 2, 0x02, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_3_alert + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x84, 1, 1, 0x04, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_3_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x84, 1, 1, 0x11, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_3_ilim_adj + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x84, 1, 2, 0x3A, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_3_Vsource + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x84, 1, 2, 0x46, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_3_power + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		status = twiFpgaWrite(0x86, 1, 2, 0x00, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_4_control + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x86, 1, 2, 0x02, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_4_alert + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x86, 1, 1, 0x04, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_4_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x86, 1, 1, 0x11, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_4_ilim_adj + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x86, 1, 2, 0x3A, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_4_Vsource + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x86, 1, 2, 0x46, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_4_power + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		status = twiFpgaWrite(0x88, 1, 2, 0x00, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_5_control + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 2, 0x02, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_5_alert + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x04, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_5_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 1, 0x11, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_5_ilim_adj + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 2, 0x3A, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_5_Vsource + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x88, 1, 2, 0x46, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_5_power + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+
+		status = twiFpgaWrite(0x8A, 1, 2, 0x00, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_6_control + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8A, 1, 2, 0x02, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_6_alert + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8A, 1, 1, 0x04, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_6_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8A, 1, 1, 0x11, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_6_ilim_adj + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8A, 1, 2, 0x3A, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_6_Vsource + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8A, 1, 2, 0x46, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_6_power + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		status = twiFpgaWrite(0x8C, 1, 2, 0x00, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_7_control + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8C, 1, 2, 0x02, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_7_alert + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8C, 1, 1, 0x04, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_7_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8C, 1, 1, 0x11, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_7_ilim_adj + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8C, 1, 2, 0x3A, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_7_Vsource + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8C, 1, 2, 0x46, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_7_power + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		status = twiFpgaWrite(0x8E, 1, 2, 0x00, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_8_control + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8E, 1, 2, 0x02, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_8_alert + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8E, 1, 1, 0x04, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_8_fault_log + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8E, 1, 1, 0x11, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_8_ilim_adj + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8E, 1, 2, 0x3A, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_8_Vsource + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x8E, 1, 2, 0x46, &retvalue, i2c2);
+		XO3_WriteByte(fram_LTC4281_B_8_power + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		status = twiFpgaWrite(0x30, 1, 2, 0x05, &retvalue, i2c2); //temp_value 0x30
+		XO3_WriteByte(fram_ADT7408_B_1_temp_val + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0x32, 1, 2, 0x05, &retvalue, i2c2); //temp_value 0x32
+		XO3_WriteByte(fram_ADT7408_B_2_temp_val + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		twi_block = 0x3;
+	}
+		
+	if ((checkInterruptIMX6() == false) && (twi_block == 0x3)) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA	
+		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C30000);
+		
+		// TWI3 - Power Supply		
+		status = twiFpgaWrite(0xB0, 1, 2, 0x8b, &retvalue, i2c3);
+		//voltage = uint16_t(retvalue) * pow(2,-9);
+		XO3_WriteByte(fram_PSU_0_vout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0xB0, 1, 2, 0x8c, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_0_iout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		//amperage = (uint16_t(retvalue) & 0x7ff) * pow(2,-3);
+		status = twiFpgaWrite(0xB0, 1, 2, 0x96, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_0_vout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		//power = (uint16_t(retvalue) & 0x7ff) * 2;
+		//powerc = amperage * voltage;
+		status = twiFpgaWrite(0xB0, 1, 1, 0x7A, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_0_status_vout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0xB0, 1, 1, 0x7B, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_0_status_iout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0xB0, 1, 2, 0x90, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_0_fan_speed + fram_offset, retvalue);
+		retvalue = 0xffffffff;	
+			
+		status = twiFpgaWrite(0xB2, 1, 2, 0x8b, &retvalue, i2c3);
+		//voltage = uint16_t(retvalue) * pow(2,-9);
+		XO3_WriteByte(fram_PSU_1_vout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0xB2, 1, 2, 0x8c, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_1_iout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		//amperage = (uint16_t(retvalue) & 0x7ff) * pow(2,-3);
+		status = twiFpgaWrite(0xB2, 1, 2, 0x96, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_1_vout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		//power = (uint16_t(retvalue) & 0x7ff) * 2;
+		//powerc = amperage * voltage;
+		status = twiFpgaWrite(0xB2, 1, 1, 0x7A, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_1_status_vout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0xB2, 1, 1, 0x7B, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_1_status_iout + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		status = twiFpgaWrite(0xB2, 1, 2, 0x90, &retvalue, i2c3);
+		XO3_WriteByte(fram_PSU_1_fan_speed + fram_offset, retvalue);
+		retvalue = 0xffffffff;
+		
+		twi_block = 0x1; // return
+	}
+	
 }
 
 int main (void)
@@ -381,14 +607,18 @@ int main (void)
 	pwm_init( PWM, &pwm_clock_opts );
 	pwm_channel_init( PWM, &pwm_opts );
 	pwm_channel_enable( PWM, PWM_CHANNEL_0 );
+	
 	// ---
 	while (1) {
 		checkInterruptIMX6();
+		
+		SPIdataBlock();
+		TWIdataBlock();
+		
 		if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
 			Timeout += pooling_time;  // Repeat this as pooling_time
 			readADCnormalized();
-			SPIdataBlock();
-			TWIdataBlock();
+
 			ioport_toggle_pin_level(PIN_LEDK8);
 // 			duty += 5;
 // 			if (duty > 70) duty = 0;
@@ -398,9 +628,9 @@ int main (void)
 
 
 			//MS_Timer
-			XO3_WriteByte(sam_user_gp0 + sam_offset, MS_Timer);
-			XO3_WriteByte(sam_user_gp1 + sam_offset, 0x1);
-			XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time);			
+// 			XO3_WriteByte(sam_user_gp0 + sam_offset, MS_Timer);
+// 			XO3_WriteByte(sam_user_gp1 + sam_offset, 0x1);
+// 			XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time);			
 		}
 		//ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
 		//XO3_WriteByte(0x00000800, 0xF);
