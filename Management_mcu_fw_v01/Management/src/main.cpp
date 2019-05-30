@@ -29,8 +29,9 @@
 
 //#define ENABLE_IMX_TWI_INTERRUPT
 bool iMX_use_TWI = false;
+uint8_t twi_block = 0x1;
 
-const uint32_t _build_version = 0xdeb00003;
+const uint32_t _build_version = 0xdeb00004;
 const uint32_t _build_date ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -240,7 +241,7 @@ void TWIdataBlock(void){
 	uint32_t retvalue = 0xffffffff;
 	float voltage, amperage, power, powerc;
 	
-	if (checkInterruptIMX6() == false) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
+	if ((checkInterruptIMX6() == false) && (twi_block == 0x1)) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
 		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C10000);
 
 		// i2c1
@@ -323,8 +324,10 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x78, 1, 1, 0x17, &retvalue, i2c1); //PGSTATRT 0x78
 		XO3_WriteByte(fram_LTC3676_M_PGSTATRT + fram_offset, retvalue);
+		
+		twi_block = 0x2;
 	}
-	if (checkInterruptIMX6() == false) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
+	if ((checkInterruptIMX6() == false) && (twi_block == 0x2)) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
 		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C20000);
 		
 		// TWI2 - Backplane
@@ -486,9 +489,11 @@ void TWIdataBlock(void){
 		status = twiFpgaWrite(0x32, 1, 2, 0x05, &retvalue, i2c2); //temp_value 0x32
 		XO3_WriteByte(fram_ADT7408_B_2_temp_val + fram_offset, retvalue);
 		retvalue = 0xffffffff;
+		
+		twi_block = 0x3;
 	}
 		
-	if (checkInterruptIMX6() == false) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA	
+	if ((checkInterruptIMX6() == false) && (twi_block == 0x3)) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA	
 		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C30000);
 		
 		// TWI3 - Power Supply		
@@ -537,6 +542,8 @@ void TWIdataBlock(void){
 		status = twiFpgaWrite(0xB2, 1, 2, 0x90, &retvalue, i2c3);
 		XO3_WriteByte(fram_PSU_1_fan_speed + fram_offset, retvalue);
 		retvalue = 0xffffffff;
+		
+		twi_block = 0x1; // return
 	}
 	
 }
@@ -604,11 +611,14 @@ int main (void)
 	// ---
 	while (1) {
 		checkInterruptIMX6();
+		
+		SPIdataBlock();
+		TWIdataBlock();
+		
 		if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
 			Timeout += pooling_time;  // Repeat this as pooling_time
 			readADCnormalized();
-			SPIdataBlock();
-			TWIdataBlock();
+
 			ioport_toggle_pin_level(PIN_LEDK8);
 // 			duty += 5;
 // 			if (duty > 70) duty = 0;
@@ -618,9 +628,9 @@ int main (void)
 
 
 			//MS_Timer
-			XO3_WriteByte(sam_user_gp0 + sam_offset, MS_Timer);
-			XO3_WriteByte(sam_user_gp1 + sam_offset, 0x1);
-			XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time);			
+// 			XO3_WriteByte(sam_user_gp0 + sam_offset, MS_Timer);
+// 			XO3_WriteByte(sam_user_gp1 + sam_offset, 0x1);
+// 			XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time);			
 		}
 		//ioport_set_pin_level(XO3_REFRESH, IOPORT_PIN_LEVEL_HIGH);
 		//XO3_WriteByte(0x00000800, 0xF);
