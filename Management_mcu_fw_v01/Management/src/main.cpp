@@ -553,7 +553,7 @@ int main (void)
 	/* Insert system clock initialization code here*/
 	sysclk_init();
 	board_init();
-	
+
 	SysTick_Config(F_CPU/1000);
 	uint32_t  Timeout = MS_Timer + 1000;
 	uint32_t pooling_time = 0;
@@ -590,8 +590,7 @@ int main (void)
 	XO3_WriteByte(sam_user_gp2 + sam_offset, 0x0); // Initialize fan speed to max
 	XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time); // ms
 	Timeout = MS_Timer + pooling_time;
-	readADCnormalized(); // Drop first read
-	
+	readADCnormalized(); // Drop first read	
 	// PWM
 	pwm_clock_t pwm_clock_opts = {
 		.ul_clka = 5000000, //10Khz frequency = .1 ms steps
@@ -607,7 +606,6 @@ int main (void)
 	pwm_init( PWM, &pwm_clock_opts );
 	pwm_channel_init( PWM, &pwm_opts );
 	pwm_channel_enable( PWM, PWM_CHANNEL_0 );
-	
 	// ---
 	while (1) {
 		checkInterruptIMX6();
@@ -649,10 +647,9 @@ int main (void)
 		//XO3_WriteByte(regfile_pll_reset + regfile_offset, 0x00000000);
 		uint32_t dato;
 		//XO3_Read(fram_LTC4281_TIME_counter_0 + fram_offset, &dato);
-		XO3_Read(regfile_fw_version, &dato);
-		
+		XO3_Read(regfile_fw_version, &dato);	
 		//XO3_Read(regfile_user_reg0, &dato);
-		ioport_toggle_pin_level(PIO_PB10_IDX);	
+		ioport_toggle_pin_level(PIO_PB10_IDX);
 	}
 
 }
