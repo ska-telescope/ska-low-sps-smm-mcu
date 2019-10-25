@@ -32,8 +32,8 @@
 
 typedef enum twiFPGAadd_t {
 	i2c1		    = 0x0,
-	i2c2			= 0x100,
-	i2c3			= 0x200
+	i2c2			= 0x1,
+	i2c3			= 0x2
 } twiFPGAadd;
 
 int twiFpgaWrite (uint8_t ICaddress,

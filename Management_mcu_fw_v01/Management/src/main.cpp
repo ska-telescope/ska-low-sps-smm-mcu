@@ -330,6 +330,9 @@ void TWIdataBlock(void){
 	if ((checkInterruptIMX6() == false) && (twi_block == 0x2)) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA
 		XO3_WriteByte(sam_user_gp3 + sam_offset, 0x12C20000);
 		
+		status = twiFpgaWrite(0x58, 1, 1, 0x3e, &retvalue, i2c2);
+		
+		
 		// TWI2 - Backplane
 		status = twiFpgaWrite(0x80, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_WriteByte(fram_LTC4281_B_1_control + fram_offset, retvalue);
