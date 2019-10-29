@@ -202,6 +202,13 @@
 #define fram_PSU_1_status_iout						0x000000354 //R  - 8 bit
 #define fram_PSU_1_fan_speed						0x000000358 //R  - 16 bit
 
+// i2c2
+#define fram_FAN_PWM								0x00000035C //RW - 8 bit
+#define fram_FAN1_TACH								0x000000360 //R  - 8 bit
+#define fram_FAN2_TACH								0x000000364 //R  - 8 bit
+#define fram_FAN3_TACH								0x000000368 //R  - 8 bit
+#define fram_FAN4_TACH								0x00000036C //R  - 8 bit
+
 
 
 #endif /* FRAM_H_ */
