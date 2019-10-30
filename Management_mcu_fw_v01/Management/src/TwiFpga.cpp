@@ -38,8 +38,8 @@ int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint
 	twi_ctrl_data += (ICaddress); // [9:0] command - [6:0] IC address
 	
 	
-	XO3_WriteByte(i2c_transmit, datatx);
-	XO3_WriteByte(i2c_command, twi_ctrl_data);
+	XO3_Write(i2c_transmit, datatx);
+	XO3_Write(i2c_command, twi_ctrl_data);
 	for (int i = 0; i < 0xffff; i++) asm("nop");
     XO3_Read(i2c_status, &statusIN);
 	while (statusIN == (0x1 || 0x3)) {

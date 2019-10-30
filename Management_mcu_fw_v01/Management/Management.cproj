@@ -574,10 +574,19 @@
     <Compile Include="src\libs\ADT7408.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="src\OneWire.cpp">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\OneWire.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\regs\FPGA_RegFiles.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\regs\fram.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\regs\onewire.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\TwiFpga.cpp">
@@ -622,7 +631,7 @@
     <Compile Include="src\regs\mdio.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\regs\onewire.h">
+    <Compile Include="src\regs\singlewire.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\regs\regfile.h">
