@@ -9,6 +9,9 @@
 #ifndef ONEWIRE_H_
 #define ONEWIRE_H_
 
+#include <stdbool.h>
+
+int OneWireSetupClock(uint8_t ClkDiv, bool ClkEN);
 int OneWireReset(void);
 int OneWireWriteByte(char Data);
 int OneWireReadByte(char *Data);

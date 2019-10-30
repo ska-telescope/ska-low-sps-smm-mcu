@@ -19,6 +19,11 @@ static const uint32_t Clock1WM		= onewire_offset + onewire_Clock1WM;	/* Address 
 /* The clock divider must be programmed before 1-Wire communication can take place */
 /* Refer to the DS1WM datasheet page 4 for the proper programming value for you system clock */
 //*Clock1WM = (unsigned char)0x12; /* Setup for 32MHz Clock */
+int OneWireSetupClock(uint8_t ClkDiv, bool ClkEN){
+	if (ClkEN) ClkDiv |= 0x80;
+	XO3_Write(Clock1WM, ClkDiv);
+	return 0;
+}
 
 /* Reset will generate a reset on the 1-Wire bus. If no presence detect was seen, it will return a 1, */
 /* otherwise it returns 0. */
