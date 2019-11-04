@@ -11,7 +11,7 @@
 
 #include "intctrl.h"
 #include "mdio.h"
-#include "onewire.h"
+#include "onewire_reg.h"
 #include "regfile.h"
 #include "sam.h"
 #include "uart.h"

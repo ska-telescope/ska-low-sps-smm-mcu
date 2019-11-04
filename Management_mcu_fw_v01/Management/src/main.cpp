@@ -132,15 +132,15 @@ void TPM_present(void){
 	if (tpmpresent & 0x40) tpmled1 += 0x4;
 	if (tpmpresent & 0x80) tpmled1 += 0x8;
 	
-	if (TPMisOn[0] & 0x800) tpmled0 += 0x10; /*tpmled0 -= 0x1;*/
-	if (TPMisOn[1] & 0x800) tpmled0 += 0x20; /*tpmled0 -= 0x2;*/
-	if (TPMisOn[2] & 0x800) tpmled0 += 0x30; /*tpmled0 -= 0x3;*/
-	if (TPMisOn[3] & 0x800) tpmled0 += 0x40; /*tpmled0 -= 0x4;*/
+	if (TPMisOn[0] & 0x800) tpmled0 = (tpmled0 & ~0x1) + 0x10;
+	if (TPMisOn[1] & 0x800) tpmled0 = (tpmled0 & ~0x2) + 0x20;
+	if (TPMisOn[2] & 0x800) tpmled0 = (tpmled0 & ~0x4) + 0x40;
+	if (TPMisOn[3] & 0x800) tpmled0 = (tpmled0 & ~0x8) + 0x80;
 	
-	if (TPMisOn[4] & 0x800) tpmled1 += 0x10; /*tpmled1 -= 0x1;*/
-	if (TPMisOn[5] & 0x800) tpmled1 += 0x20; /*tpmled1 -= 0x2;*/
-	if (TPMisOn[6] & 0x800) tpmled1 += 0x30; /*tpmled1 -= 0x3;*/
-	if (TPMisOn[7] & 0x800) tpmled1 += 0x40; /*tpmled1 -= 0x4;*/
+	if (TPMisOn[4] & 0x800) tpmled1 = (tpmled1 & ~0x1) + 0x10;
+	if (TPMisOn[5] & 0x800) tpmled1 = (tpmled1 & ~0x2) + 0x20;
+	if (TPMisOn[6] & 0x800) tpmled1 = (tpmled1 & ~0x4) + 0x40;
+	if (TPMisOn[7] & 0x800) tpmled1 = (tpmled1 & ~0x8) + 0x80;
 	
 	status = twiFpgaWrite(0x42, 1, 2, tpmled0, &retvalue, i2c4);
 	status = twiFpgaWrite(0x40, 1, 2, tpmled1, &retvalue, i2c4);	
@@ -701,9 +701,9 @@ int main (void)
 	spi_enable(MYSPI);
 	spi_enable_clock(MYSPI);
 	uint32_t vers;
-	XO3_Read(regfile_fw_version + regfile_offset, &vers);
 	twiFpgaWrite(0x40, 1, 2, 0xf, &vers, i2c4);
 	twiFpgaWrite(0x42, 1, 2, 0xf, &vers, i2c4);
+	XO3_Read(regfile_fw_version + regfile_offset, &vers);
 	XO3_Write(sam_mcufw_build_version + sam_offset, _build_version);
 	XO3_Write(sam_mcufw_build_time + sam_offset, _build_time);
 	XO3_Write(sam_mcufw_build_date + sam_offset, _build_date);
@@ -727,9 +727,13 @@ int main (void)
 	pwm_channel_init( PWM, &pwm_opts );
 	pwm_channel_enable( PWM, PWM_CHANNEL_0 );
 	fan_setup();
-	
+	OneWireSetupClock(0x11, true);
+	OneWireSelectCS(TPM1OW);
 	twiFpgaWrite(0x40, 1, 2, 0xf0, &vers, i2c4);
 	twiFpgaWrite(0x42, 1, 2, 0xf0, &vers, i2c4);
+	
+	twiFpgaWrite(0x80, 3, 2, 0x00bb00, &vers, i2c2);
+	//XO3_Write(fram_FAN_PWM + fram_offset, 0x00FFFFFF);	
 	// ---
 	while (1) {
 		checkInterruptIMX6();
@@ -775,7 +779,34 @@ int main (void)
 		//XO3_Read(regfile_user_reg0, &dato);
 		ioport_toggle_pin_level(PIO_PB10_IDX);
 		
+// 		static int CS1WAct = 0x0;
+// 		if (CS1WAct > 0x70) CS1WAct = 0x0;
 		
+		char onedata[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		int status[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+		
+		status[0] = OneWireReadByte(&onedata[0]);
+		
+		if(!OneWireReset()){
+			status[0] = OneWireWriteByte(0xF0);
+// 			status[0] = OneWireWriteByte(0xCC);
+// 			status[0] = OneWireWriteByte(0x44);
+// 			status[0] = OneWireWriteByte(0xCC);
+// 			status[0] = OneWireWriteByte(0xBE);
+			//status = OneWireWriteByte(0xBE);
+			//status = OneWireWriteByte(0x28);
+			//OneWireReadByte(&onedata[0]);
+ 			//OneWireWriteByte(0x44);
+ 			for (int i = 0; i < 16; i++){
+				 status[i] = OneWireReadByte(&onedata[i]);
+				 if (status[i]) break;
+			 }
+		}
+
+		asm("nop");
+		
+// 		CS1WAct = CS1WAct + 0x10;
+// 		OneWireSelectCS(CS1W(CS1WAct));
 	}
 
 }

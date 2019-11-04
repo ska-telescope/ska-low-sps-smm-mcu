@@ -586,7 +586,7 @@
     <Compile Include="src\regs\fram.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\regs\onewire.h">
+    <Compile Include="src\regs\onewire_reg.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\TwiFpga.cpp">
