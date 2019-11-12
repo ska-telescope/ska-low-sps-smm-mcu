@@ -204,10 +204,10 @@
 
 // i2c2
 #define fram_FAN_PWM								0x00000035C //RW - 8 bit
-#define fram_FAN1_TACH								0x000000360 //R  - 8 bit
-#define fram_FAN2_TACH								0x000000364 //R  - 8 bit
-#define fram_FAN3_TACH								0x000000368 //R  - 8 bit
-#define fram_FAN4_TACH								0x00000036C //R  - 8 bit
+#define fram_FAN1_TACH								0x000000360 //R  - 32 bit
+#define fram_FAN2_TACH								0x000000364 //R  - 32 bit
+#define fram_FAN3_TACH								0x000000368 //R  - 32 bit
+#define fram_FAN4_TACH								0x00000036C //R  - 32 bit
 
 
 

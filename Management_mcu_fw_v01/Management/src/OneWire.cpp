@@ -17,7 +17,7 @@ static const uint32_t Command1WM	= onewire_offset + onewire_Command1WM;	/* Addre
 static const uint32_t Data1WM		= onewire_offset + onewire_Data1WM;		/* Address of Data Register */
 static const uint32_t Int1WM		= onewire_offset + onewire_Int1WM;		/* Address of Interrupt Register */
 static const uint32_t Clock1WM		= onewire_offset + onewire_Clock1WM;	/* Address DS1WM Clock Divider */
-static const uint32_t Mux1WM		= onewire_offset + onewire_Ctrl1WM;		/* Address of Mux for select DS1WM Output Pin */
+static const uint32_t Mux1WM		= onewire_offset + onewire_Mux1WM;		/* Address of Mux for select DS1WM Output Pin */
 
 static const int DELAY_GENERAL = 100000;
 
@@ -41,10 +41,10 @@ int OneWireReset(void)
 	int DELAY = DELAY_GENERAL; /* Time to Poll for Completion */
 	/* Choose a length to Poll that is slightly greater than */
 	/* the maximum possible time to complete the operation */
-	XO3_Read(Command1WM, &readback);
-	readback = (readback & ~0x0f); // TEMPORARY
+	//XO3_Read(Command1WM, &readback);
+	//readback = (readback & ~0x0f); // TEMPORARY
 		
-	XO3_Write(Command1WM, readback + 0x1); /* Send 1WR Reset */
+	XO3_Write(Command1WM, /*readback +*/ 0x1); /* Send 1WR Reset */
 	for( loop=0; loop < DELAY; loop++ ) /* Poll INT Register for command completion */
 	{
 		XO3_Read(Int1WM, &readback);	
@@ -88,7 +88,7 @@ int OneWireReadByte(char *Data)
 	int DELAY = DELAY_GENERAL; /* Time to Poll for Completion */
 	/* Choose a length to Poll that is slightly greater than */
 	/* the maximum possible time to complete the operation */
-
+	XO3_Read(Data1WM, &readback);
 	if(OneWireWriteByte((char)0xFF)) return 1; /* Generate 1-Wire read timeslots */
 	for( loop=0; loop < DELAY; loop++ ) /* Poll INT Register for command completion */
 	{
@@ -99,6 +99,37 @@ int OneWireReadByte(char *Data)
 	if(loop == DELAY) return 1; /* Operation Timed Out */
 	XO3_Read(Data1WM, &readback);
 	*Data = readback; /* Retrieve data that was returned */
+	return 0;
+}
+
+/* Read a byte from the 1-Wire Bus. Write a 0xFF to create read time slots and poll for receive */
+/* buffer full before moving the result to the location pointed to by *Data. Returns a 1 if either */
+/* the write 0xFF or read times out, 0 otherwise. */
+int OneWireSearch()
+{
+	unsigned char result;
+	uint32_t readback;
+	char Data[16];
+	int loop;
+	int DELAY = DELAY_GENERAL; /* Time to Poll for Completion */
+	/* Choose a length to Poll that is slightly greater than */
+	/* the maximum possible time to complete the operation */
+	if(OneWireReset()) return 1;
+	
+	OneWireWriteByte(0xF0);
+	XO3_Write(Command1WM,0x2);
+	for (int i = 0; i < 16; i++){
+		if(OneWireWriteByte((char)0x00)) return 1; /* Generate 1-Wire read timeslots */
+		for( loop=0; loop < DELAY; loop++ ) /* Poll INT Register for command completion */
+		{
+			XO3_Read(Int1WM, &readback);
+			result=(unsigned char)readback;
+			if((result&0x10) == 0x10 ) break; /* Poll RBF until set */
+		}
+		if(loop == DELAY) return 1; /* Operation Timed Out */
+		XO3_Read(Data1WM, &readback);
+		Data[i] = readback; /* Retrieve data that was returned */
+	}
 	return 0;
 }
 

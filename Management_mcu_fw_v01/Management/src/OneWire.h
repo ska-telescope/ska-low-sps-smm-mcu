@@ -29,5 +29,6 @@ int OneWireReset (void);
 int OneWireWriteByte (char Data);
 int OneWireReadByte (char *Data);
 int OneWireSelectCS (CS1W CS);
+int OneWireSearch();
 
 #endif /* ONEWIRE_H_ */

@@ -69,6 +69,7 @@ void fan_setup(void){
 	
 	twiFpgaWrite(0x58, 2, 1, 0x6800, &retvalue, i2c2);
 	twiFpgaWrite(0x58, 2, 1, 0x6900, &retvalue, i2c2);
+	twiFpgaWrite(0x58, 2, 1, 0x4355, &retvalue, i2c2);
 	
 	twiFpgaWrite(0x5E, 2, 1, 0x6800, &retvalue, i2c2);
 	twiFpgaWrite(0x5E, 2, 1, 0x6900, &retvalue, i2c2);
@@ -91,18 +92,19 @@ void fan_PWM(void){
 	uint16_t cmd0, cmd1;
 	int oneTPMisON0 = 0;
 	int oneTPMisON1 = 0;
+	uint32_t tachl, tachm;
 	
 	XO3_Read(fram_FAN_PWM + fram_offset, &fan_speed);
 	
 	for (int i = 0; i< 4; i++) if(TPMisOn[i] & 0x800) oneTPMisON0++;
 	for (int i = 4; i< 8; i++) if(TPMisOn[i] & 0x800) oneTPMisON1++;
 	
-	if ((fan_speed & 0x2000000) && (oneTPMisON0 > 0)){
-		fan_speed = (fan_speed & ~0x00ff) + (0x33 * oneTPMisON0) + 0x30;
+	if ((fan_speed & 0x2000000)){
+		fan_speed = (fan_speed & ~0x00ff) + (0x33 * oneTPMisON0) + 0x33;
 	}
 	
-	if ((fan_speed & 0x2000000) && (oneTPMisON1 > 0)){
-		fan_speed = (fan_speed & ~0xff00) + ((0x33 * oneTPMisON1) << 8) + 0x3000;
+	if ((fan_speed & 0x2000000)){
+		fan_speed = (fan_speed & ~0xff00) + ((0x33 * oneTPMisON1) << 8) + 0x3300;
 	} 
 	
 	for (uint16_t i = 0x32; i < 0x36; i++){
@@ -112,6 +114,30 @@ void fan_PWM(void){
 		twiFpgaWrite(0x58, 2, 1, cmd0, &retvalue, i2c2);
 		twiFpgaWrite(0x5E, 2, 1, cmd1, &retvalue, i2c2);
 	}
+	
+	tachl = twiFpgaRead8(0x58, 0x2A, i2c2);
+	tachm = twiFpgaRead8(0x58, 0x2B, i2c2);
+	tachl = tachl + (tachm << 8);
+	//tachl = 5400000 / tachl;	
+	XO3_Write(fram_FAN1_TACH + fram_offset, tachl);
+	
+	tachl = twiFpgaRead8(0x58, 0x2C, i2c2);
+	tachm = twiFpgaRead8(0x58, 0x2D, i2c2);
+	tachl = tachl + (tachm << 8);
+	//tachl = 5400000 / tachl;	
+	XO3_Write(fram_FAN2_TACH + fram_offset, tachl);
+	
+	tachl = twiFpgaRead8(0x5E, 0x2A, i2c2);
+	tachm = twiFpgaRead8(0x58, 0x2B, i2c2);
+	tachl = tachl + (tachm << 8);
+	//tachl = 5400000 / tachl;
+	XO3_Write(fram_FAN3_TACH + fram_offset, tachl);
+	
+	tachl = twiFpgaRead8(0x5E, 0x2C, i2c2);
+	tachm = twiFpgaRead8(0x58, 0x2D, i2c2);
+	tachl = tachl + (tachm << 8);
+	//tachl = 5400000 / tachl;
+	XO3_Write(fram_FAN4_TACH + fram_offset, tachl);
 	
 }
 
@@ -727,12 +753,14 @@ int main (void)
 	pwm_channel_init( PWM, &pwm_opts );
 	pwm_channel_enable( PWM, PWM_CHANNEL_0 );
 	fan_setup();
-	OneWireSetupClock(0x11, true);
-	OneWireSelectCS(TPM1OW);
+//  	OneWireSetupClock(0xF, true);
+  	OneWireSelectCS(TPM1OW);
 	twiFpgaWrite(0x40, 1, 2, 0xf0, &vers, i2c4);
 	twiFpgaWrite(0x42, 1, 2, 0xf0, &vers, i2c4);
 	
-	twiFpgaWrite(0x80, 3, 2, 0x00bb00, &vers, i2c2);
+//  	twiFpgaWrite(0x80, 3, 2, 0x00bb00, &vers, i2c2);
+//  	twiFpgaWrite(0x82, 3, 2, 0x00bb00, &vers, i2c2);
+
 	//XO3_Write(fram_FAN_PWM + fram_offset, 0x00FFFFFF);	
 	// ---
 	while (1) {
@@ -785,9 +813,9 @@ int main (void)
 		char onedata[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		int status[16] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 		
-		status[0] = OneWireReadByte(&onedata[0]);
-		
-		if(!OneWireReset()){
+		//OneWireSearch();
+
+/*		if(!OneWireReset()){
 			status[0] = OneWireWriteByte(0xF0);
 // 			status[0] = OneWireWriteByte(0xCC);
 // 			status[0] = OneWireWriteByte(0x44);
@@ -803,7 +831,7 @@ int main (void)
 			 }
 		}
 
-		asm("nop");
+		asm("nop");*/
 		
 // 		CS1WAct = CS1WAct + 0x10;
 // 		OneWireSelectCS(CS1W(CS1WAct));

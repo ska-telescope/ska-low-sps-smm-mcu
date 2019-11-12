@@ -39,10 +39,10 @@
 #define onewire_Ctrl1WM_R		0x0
 #define onewire_Ctrl1WM_D		"Ctrl Register"
 
-#define onewire_Ctrl1WM  		0x00000018	//RW
-#define onewire_Ctrl1WM_M		0x000000ff
-#define onewire_Ctrl1WM_R		0x0
-#define onewire_Ctrl1WM_D		"Mux Register"
+#define onewire_Mux1WM  		0x00000018	//RW
+#define onewire_Mux1WM_M		0x000000ff
+#define onewire_Mux1WM_R		0x0
+#define onewire_Mux1WM_D		"Mux Register"
 
 
 
