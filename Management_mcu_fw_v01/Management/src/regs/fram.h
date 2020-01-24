@@ -210,5 +210,7 @@
 #define fram_FAN4_TACH								0x00000036C //R  - 32 bit
 
 
+#define fram_TPM_SUPPLY_STATUS						0x000000370 //R  - 32 bit
+
 
 #endif /* FRAM_H_ */

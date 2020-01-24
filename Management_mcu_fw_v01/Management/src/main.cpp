@@ -32,7 +32,7 @@
 bool iMX_use_TWI = false;
 uint8_t twi_block = 0x1;
 
-const uint32_t _build_version = 0xdeb00020;
+const uint32_t _build_version = 0xdeb00022;
 const uint32_t _build_date = ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -55,7 +55,13 @@ uint32_t duty;
 
 pwm_channel_t pwm_opts;
 
-uint16_t TPMisOn[8];
+struct TPMstruct {
+	bool TPMPRESENT;
+	bool TPMisOn;
+	bool TPMsupplyFault;
+};
+
+struct TPMstruct TPMcontrol[8];
 
 volatile uint32_t MS_Timer = 0;
 void SysTick_Handler(void) {
@@ -97,10 +103,11 @@ void fan_PWM(void){
 	
 	XO3_Read(fram_FAN_PWM + fram_offset, &fan_speed);
 	
-	for (int i = 0; i< 4; i++) if(TPMisOn[i] & 0x800) oneTPMisON0++;
-	for (int i = 4; i< 8; i++) if(TPMisOn[i] & 0x800) oneTPMisON1++;
+	for (int i = 0; i< 4; i++) if((TPMcontrol[i].TPMisOn) && (!TPMcontrol[i].TPMsupplyFault)) oneTPMisON0++;
+	for (int i = 4; i< 8; i++) if((TPMcontrol[i].TPMisOn) && (!TPMcontrol[i].TPMsupplyFault)) oneTPMisON1++;
 	
-	if ((fan_speed & 0x2000000)){
+	
+	if ((fan_speed & 0x1000000)){
 		fan_speed = (fan_speed & ~0x00ff) + (0x33 * oneTPMisON0) + 0x33;
 		automode = true;
 	}
@@ -150,28 +157,59 @@ void TPM_present(void){
 	uint32_t tpmpresent, retvalue;
 	uint8_t tpmled0 = 0;
 	uint8_t tpmled1 = 0;
+	
+	static bool primopasso = true;
+	
+	for (int i = 0; i < 8; i++) TPMcontrol[i].TPMPRESENT = false; // Clean regs.
+	
 	int status;
 	XO3_Read(regfile_present_tpm + regfile_offset, &tpmpresent);
 	
-	if (tpmpresent & 0x1) tpmled0 += 0x1;
-	if (tpmpresent & 0x2) tpmled0 += 0x2;
-	if (tpmpresent & 0x4) tpmled0 += 0x4;
-	if (tpmpresent & 0x8) tpmled0 += 0x8;
+	if ((tpmpresent & 0x1 ) && (!TPMcontrol[0].TPMsupplyFault)) tpmled0 += 0x1; TPMcontrol[0].TPMPRESENT = true;
+	if ((tpmpresent & 0x2 ) && (!TPMcontrol[1].TPMsupplyFault)) tpmled0 += 0x2; TPMcontrol[1].TPMPRESENT = true;
+	if ((tpmpresent & 0x4 ) && (!TPMcontrol[2].TPMsupplyFault)) tpmled0 += 0x4; TPMcontrol[2].TPMPRESENT = true;
+	if ((tpmpresent & 0x8 ) && (!TPMcontrol[3].TPMsupplyFault)) tpmled0 += 0x8; TPMcontrol[3].TPMPRESENT = true;
+		
+	if ((tpmpresent & 0x10) && (!TPMcontrol[4].TPMsupplyFault)) tpmled1 += 0x1; TPMcontrol[4].TPMPRESENT = true;
+	if ((tpmpresent & 0x20) && (!TPMcontrol[5].TPMsupplyFault)) tpmled1 += 0x2; TPMcontrol[5].TPMPRESENT = true;
+	if ((tpmpresent & 0x40) && (!TPMcontrol[6].TPMsupplyFault)) tpmled1 += 0x4; TPMcontrol[6].TPMPRESENT = true;
+	if ((tpmpresent & 0x80) && (!TPMcontrol[7].TPMsupplyFault)) tpmled1 += 0x8; TPMcontrol[7].TPMPRESENT = true;
 	
-	if (tpmpresent & 0x10) tpmled1 += 0x1;
-	if (tpmpresent & 0x20) tpmled1 += 0x2;
-	if (tpmpresent & 0x40) tpmled1 += 0x4;
-	if (tpmpresent & 0x80) tpmled1 += 0x8;
+	if ((TPMcontrol[0].TPMisOn) && (!TPMcontrol[0].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x1) + 0x10;
+	if ((TPMcontrol[1].TPMisOn) && (!TPMcontrol[1].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x2) + 0x20;
+	if ((TPMcontrol[2].TPMisOn) && (!TPMcontrol[2].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x4) + 0x40;
+	if ((TPMcontrol[3].TPMisOn) && (!TPMcontrol[3].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x8) + 0x80;
 	
-	if (TPMisOn[0] & 0x800) tpmled0 = (tpmled0 & ~0x1) + 0x10;
-	if (TPMisOn[1] & 0x800) tpmled0 = (tpmled0 & ~0x2) + 0x20;
-	if (TPMisOn[2] & 0x800) tpmled0 = (tpmled0 & ~0x4) + 0x40;
-	if (TPMisOn[3] & 0x800) tpmled0 = (tpmled0 & ~0x8) + 0x80;
+	if ((TPMcontrol[4].TPMisOn) && (!TPMcontrol[4].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x1) + 0x10;
+	if ((TPMcontrol[5].TPMisOn) && (!TPMcontrol[5].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x2) + 0x20;
+ 	if ((TPMcontrol[6].TPMisOn) && (!TPMcontrol[6].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x4) + 0x40;
+ 	if ((TPMcontrol[7].TPMisOn) && (!TPMcontrol[7].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x8) + 0x80;
+
+	if (primopasso) {
+		if (TPMcontrol[0].TPMsupplyFault) tpmled0 += 0x1;
+		if (TPMcontrol[1].TPMsupplyFault) tpmled0 += 0x2;
+		if (TPMcontrol[2].TPMsupplyFault) tpmled0 += 0x4;
+		if (TPMcontrol[3].TPMsupplyFault) tpmled0 += 0x8;
+		
+		if (TPMcontrol[4].TPMsupplyFault) tpmled1 += 0x1;
+		if (TPMcontrol[5].TPMsupplyFault) tpmled1 += 0x2;
+		if (TPMcontrol[6].TPMsupplyFault) tpmled1 += 0x4;
+		if (TPMcontrol[7].TPMsupplyFault) tpmled1 += 0x8;
+		
+		primopasso = !primopasso;
+	}
+	else {
+		primopasso = !primopasso;
+	}
 	
-	if (TPMisOn[4] & 0x800) tpmled1 = (tpmled1 & ~0x1) + 0x10;
-	if (TPMisOn[5] & 0x800) tpmled1 = (tpmled1 & ~0x2) + 0x20;
-	if (TPMisOn[6] & 0x800) tpmled1 = (tpmled1 & ~0x4) + 0x40;
-	if (TPMisOn[7] & 0x800) tpmled1 = (tpmled1 & ~0x8) + 0x80;
+	uint32_t supplystatus = 0;
+	
+	for (int i = 0; i < 8; i++){
+		if ((TPMcontrol[i].TPMisOn) && (!TPMcontrol[i].TPMsupplyFault)) supplystatus += pow(2,i);
+		if (TPMcontrol[i].TPMsupplyFault) supplystatus += pow(2,(i+8));
+	}
+	
+	XO3_Write(fram_TPM_SUPPLY_STATUS + fram_offset, supplystatus);	
 	
 	status = twiFpgaWrite(0x42, 1, 2, tpmled0, &retvalue, i2c4);
 	status = twiFpgaWrite(0x40, 1, 2, tpmled1, &retvalue, i2c4);	
@@ -458,7 +496,7 @@ void TWIdataBlock(void){
 		
 		status = twiFpgaWrite(0x80, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_1_control + fram_offset, retvalue);
-		TPMisOn[0] = retvalue;
+		if (retvalue & 0x800) TPMcontrol[0].TPMisOn = true; else TPMcontrol[0].TPMisOn = false;
 		retvalue = 0xffffffff;		
 		status = twiFpgaWrite(0x80, 1, 2, 0x02, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_1_alert + fram_offset, retvalue);
@@ -471,6 +509,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;		
 		status = twiFpgaWrite(0x80, 1, 2, 0x3A, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_1_Vsource + fram_offset, retvalue);
+		if(retvalue == 0x0000ffff) TPMcontrol[0].TPMsupplyFault = true;
 		retvalue = 0xffffffff;		
 		status = twiFpgaWrite(0x80, 1, 2, 0x46, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_1_power + fram_offset, retvalue);
@@ -478,7 +517,7 @@ void TWIdataBlock(void){
 		
 		status = twiFpgaWrite(0x82, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_2_control + fram_offset, retvalue);
-		TPMisOn[1] = retvalue;
+		if (retvalue & 0x800) TPMcontrol[1].TPMisOn = true; else TPMcontrol[1].TPMisOn = false;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x82, 1, 2, 0x02, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_2_alert + fram_offset, retvalue);
@@ -491,6 +530,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x82, 1, 2, 0x3A, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_2_Vsource + fram_offset, retvalue);
+		if(retvalue == 0x0000ffff) TPMcontrol[1].TPMsupplyFault = true;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x82, 1, 2, 0x46, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_2_power + fram_offset, retvalue);
@@ -498,7 +538,7 @@ void TWIdataBlock(void){
 		
 		status = twiFpgaWrite(0x84, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_3_control + fram_offset, retvalue);
-		TPMisOn[2] = retvalue;
+		if (retvalue & 0x800) TPMcontrol[2].TPMisOn = true; else TPMcontrol[2].TPMisOn = false;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x84, 1, 2, 0x02, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_3_alert + fram_offset, retvalue);
@@ -511,6 +551,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x84, 1, 2, 0x3A, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_3_Vsource + fram_offset, retvalue);
+		if(retvalue == 0x0000ffff) TPMcontrol[2].TPMsupplyFault = true;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x84, 1, 2, 0x46, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_3_power + fram_offset, retvalue);
@@ -518,7 +559,7 @@ void TWIdataBlock(void){
 		
 		status = twiFpgaWrite(0x86, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_4_control + fram_offset, retvalue);
-		TPMisOn[3] = retvalue;
+		if (retvalue & 0x800) TPMcontrol[3].TPMisOn = true; else TPMcontrol[3].TPMisOn = false;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x86, 1, 2, 0x02, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_4_alert + fram_offset, retvalue);
@@ -531,6 +572,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x86, 1, 2, 0x3A, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_4_Vsource + fram_offset, retvalue);
+		if(retvalue == 0x0000ffff) TPMcontrol[3].TPMsupplyFault = true;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x86, 1, 2, 0x46, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_4_power + fram_offset, retvalue);
@@ -538,7 +580,7 @@ void TWIdataBlock(void){
 		
 		status = twiFpgaWrite(0x88, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_5_control + fram_offset, retvalue);
-		TPMisOn[4] = retvalue;
+		if (retvalue & 0x800) TPMcontrol[4].TPMisOn = true; else TPMcontrol[4].TPMisOn = false;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x88, 1, 2, 0x02, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_5_alert + fram_offset, retvalue);
@@ -551,6 +593,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x88, 1, 2, 0x3A, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_5_Vsource + fram_offset, retvalue);
+		if(retvalue == 0x0000ffff) TPMcontrol[4].TPMsupplyFault = true;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x88, 1, 2, 0x46, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_5_power + fram_offset, retvalue);
@@ -558,7 +601,7 @@ void TWIdataBlock(void){
 
 		status = twiFpgaWrite(0x8A, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_6_control + fram_offset, retvalue);
-		TPMisOn[5] = retvalue;
+		if (retvalue & 0x800) TPMcontrol[5].TPMisOn = true; else TPMcontrol[5].TPMisOn = false;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8A, 1, 2, 0x02, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_6_alert + fram_offset, retvalue);
@@ -571,6 +614,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8A, 1, 2, 0x3A, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_6_Vsource + fram_offset, retvalue);
+		if(retvalue == 0x0000ffff) TPMcontrol[5].TPMsupplyFault = true;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8A, 1, 2, 0x46, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_6_power + fram_offset, retvalue);
@@ -578,7 +622,7 @@ void TWIdataBlock(void){
 		
 		status = twiFpgaWrite(0x8C, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_7_control + fram_offset, retvalue);
-		TPMisOn[6] = retvalue;
+		if (retvalue & 0x800) TPMcontrol[6].TPMisOn = true; else TPMcontrol[6].TPMisOn = false;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8C, 1, 2, 0x02, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_7_alert + fram_offset, retvalue);
@@ -591,6 +635,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8C, 1, 2, 0x3A, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_7_Vsource + fram_offset, retvalue);
+		if(retvalue == 0x0000ffff) TPMcontrol[6].TPMsupplyFault = true;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8C, 1, 2, 0x46, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_7_power + fram_offset, retvalue);
@@ -598,7 +643,7 @@ void TWIdataBlock(void){
 		
 		status = twiFpgaWrite(0x8E, 1, 2, 0x00, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_8_control + fram_offset, retvalue);
-		TPMisOn[7] = retvalue;
+		if (retvalue & 0x800) TPMcontrol[7].TPMisOn = true; else TPMcontrol[7].TPMisOn = false;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8E, 1, 2, 0x02, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_8_alert + fram_offset, retvalue);
@@ -611,6 +656,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8E, 1, 2, 0x3A, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_8_Vsource + fram_offset, retvalue);
+		if(retvalue == 0x0000ffff) TPMcontrol[7].TPMsupplyFault = true;
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x8E, 1, 2, 0x46, &retvalue, i2c2);
 		XO3_Write(fram_LTC4281_B_8_power + fram_offset, retvalue);
