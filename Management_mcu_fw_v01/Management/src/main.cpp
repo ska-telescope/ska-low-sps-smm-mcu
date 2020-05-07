@@ -17,7 +17,7 @@
 #include "build_def.h"
 #include <TwiFpga.h>
 //#include "i2c.h"
-#include <onewire.h>
+//#include <onewire.h>
 
 // Registers
 // #include "intctrl.h"
@@ -32,7 +32,7 @@
 bool iMX_use_TWI = false;
 uint8_t twi_block = 0x1;
 
-const uint32_t _build_version = 0xdeb00023;
+const uint32_t _build_version = 0xdeb00024;
 const uint32_t _build_date = ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -826,7 +826,7 @@ int main (void)
 	pwm_channel_enable( PWM, PWM_CHANNEL_0 );
 	fan_setup();
 //  	OneWireSetupClock(0xF, true);
-  	OneWireSelectCS(TPM1OW);
+  	//OneWireSelectCS(TPM1OW);
 	twiFpgaWrite(0x40, 1, 2, 0xf0, &vers, i2c4);
 	twiFpgaWrite(0x42, 1, 2, 0xf0, &vers, i2c4);
 	
@@ -875,7 +875,7 @@ int main (void)
 		//XO3_WriteByte(regfile_pll_reset + regfile_offset, 0x00000000);
 		uint32_t dato;
 		//XO3_Read(fram_LTC4281_TIME_counter_0 + fram_offset, &dato);
-		XO3_Read(regfile_fw_version, &dato);	
+		XO3_Read(regfile_fw_version + regfile_offset, &dato);	
 		//XO3_Read(regfile_user_reg0, &dato);
 		ioport_toggle_pin_level(PIO_PB10_IDX);
 		XO3_Read(fram_PSU_0_vout + fram_offset, &dato);
