@@ -32,7 +32,7 @@
 bool iMX_use_TWI = false;
 uint8_t twi_block = 0x1;
 
-const uint32_t _build_version = 0xdeb00022;
+const uint32_t _build_version = 0xdeb00023;
 const uint32_t _build_date = ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -79,6 +79,7 @@ void fan_setup(void){
 	
 	twiFpgaWrite(0x5E, 2, 1, 0x6800, &retvalue, i2c2);
 	twiFpgaWrite(0x5E, 2, 1, 0x6900, &retvalue, i2c2);
+	twiFpgaWrite(0x5E, 2, 1, 0x4355, &retvalue, i2c2);
 
 	for (uint16_t i = 0x32; i < 0x36; i++){
 		address = (i << 8) + (uint8_t)fan_speed;
@@ -153,7 +154,7 @@ void fan_PWM(void){
 	
 }
 
-void TPM_present(void){
+void TPMpresent(void){
 	uint32_t tpmpresent, retvalue;
 	uint8_t tpmled0 = 0;
 	uint8_t tpmled1 = 0;
@@ -165,27 +166,39 @@ void TPM_present(void){
 	int status;
 	XO3_Read(regfile_present_tpm + regfile_offset, &tpmpresent);
 	
+	// Present - red LED
 	if ((tpmpresent & 0x1 ) && (!TPMcontrol[0].TPMsupplyFault)) tpmled0 += 0x1; TPMcontrol[0].TPMPRESENT = true;
 	if ((tpmpresent & 0x2 ) && (!TPMcontrol[1].TPMsupplyFault)) tpmled0 += 0x2; TPMcontrol[1].TPMPRESENT = true;
 	if ((tpmpresent & 0x4 ) && (!TPMcontrol[2].TPMsupplyFault)) tpmled0 += 0x4; TPMcontrol[2].TPMPRESENT = true;
 	if ((tpmpresent & 0x8 ) && (!TPMcontrol[3].TPMsupplyFault)) tpmled0 += 0x8; TPMcontrol[3].TPMPRESENT = true;
-		
 	if ((tpmpresent & 0x10) && (!TPMcontrol[4].TPMsupplyFault)) tpmled1 += 0x1; TPMcontrol[4].TPMPRESENT = true;
 	if ((tpmpresent & 0x20) && (!TPMcontrol[5].TPMsupplyFault)) tpmled1 += 0x2; TPMcontrol[5].TPMPRESENT = true;
 	if ((tpmpresent & 0x40) && (!TPMcontrol[6].TPMsupplyFault)) tpmled1 += 0x4; TPMcontrol[6].TPMPRESENT = true;
 	if ((tpmpresent & 0x80) && (!TPMcontrol[7].TPMsupplyFault)) tpmled1 += 0x8; TPMcontrol[7].TPMPRESENT = true;
 	
-	if ((TPMcontrol[0].TPMisOn) && (!TPMcontrol[0].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x1) + 0x10;
-	if ((TPMcontrol[1].TPMisOn) && (!TPMcontrol[1].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x2) + 0x20;
-	if ((TPMcontrol[2].TPMisOn) && (!TPMcontrol[2].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x4) + 0x40;
-	if ((TPMcontrol[3].TPMisOn) && (!TPMcontrol[3].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x8) + 0x80;
+	// ON - green LED
+	if ((TPMcontrol[0].TPMisOn) && (tpmpresent & 0x1 ) && (!TPMcontrol[0].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x1) + 0x10;
+	if ((TPMcontrol[1].TPMisOn) && (tpmpresent & 0x2 ) && (!TPMcontrol[1].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x2) + 0x20;
+	if ((TPMcontrol[2].TPMisOn) && (tpmpresent & 0x4 ) && (!TPMcontrol[2].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x4) + 0x40;
+	if ((TPMcontrol[3].TPMisOn) && (tpmpresent & 0x8 ) && (!TPMcontrol[3].TPMsupplyFault)) tpmled0 = (tpmled0 & ~0x8) + 0x80;
+	if ((TPMcontrol[4].TPMisOn) && (tpmpresent & 0x10) && (!TPMcontrol[4].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x1) + 0x10;
+	if ((TPMcontrol[5].TPMisOn) && (tpmpresent & 0x20) && (!TPMcontrol[5].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x2) + 0x20;
+	if ((TPMcontrol[6].TPMisOn) && (tpmpresent & 0x40) && (!TPMcontrol[6].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x4) + 0x40;
+	if ((TPMcontrol[7].TPMisOn) && (tpmpresent & 0x80) && (!TPMcontrol[7].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x8) + 0x80;
+	 
 	
-	if ((TPMcontrol[4].TPMisOn) && (!TPMcontrol[4].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x1) + 0x10;
-	if ((TPMcontrol[5].TPMisOn) && (!TPMcontrol[5].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x2) + 0x20;
- 	if ((TPMcontrol[6].TPMisOn) && (!TPMcontrol[6].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x4) + 0x40;
- 	if ((TPMcontrol[7].TPMisOn) && (!TPMcontrol[7].TPMsupplyFault)) tpmled1 = (tpmled1 & ~0x8) + 0x80;
-
-	if (primopasso) {
+	if (primopasso){
+		// TPM is ON but not present
+		if ((TPMcontrol[0].TPMisOn) && (!(tpmpresent & 0x1 ))) tpmled0 += 0x10;
+		if ((TPMcontrol[1].TPMisOn) && (!(tpmpresent & 0x2 ))) tpmled0 += 0x20;
+		if ((TPMcontrol[2].TPMisOn) && (!(tpmpresent & 0x4 ))) tpmled0 += 0x40;
+		if ((TPMcontrol[3].TPMisOn) && (!(tpmpresent & 0x8 ))) tpmled0 += 0x80;
+		if ((TPMcontrol[4].TPMisOn) && (!(tpmpresent & 0x10))) tpmled1 += 0x10;
+		if ((TPMcontrol[5].TPMisOn) && (!(tpmpresent & 0x20))) tpmled1 += 0x20;
+		if ((TPMcontrol[6].TPMisOn) && (!(tpmpresent & 0x40))) tpmled1 += 0x40;
+		if ((TPMcontrol[7].TPMisOn) && (!(tpmpresent & 0x80))) tpmled1 += 0x80;
+				
+		// Supply Error - Red LED blink
 		if (TPMcontrol[0].TPMsupplyFault) tpmled0 += 0x1;
 		if (TPMcontrol[1].TPMsupplyFault) tpmled0 += 0x2;
 		if (TPMcontrol[2].TPMsupplyFault) tpmled0 += 0x4;
@@ -199,6 +212,15 @@ void TPM_present(void){
 		primopasso = !primopasso;
 	}
 	else {
+		// TPM is ON but not present
+		if ((TPMcontrol[0].TPMisOn) && (!(tpmpresent & 0x1 ))) tpmled0 += 0x1;
+		if ((TPMcontrol[1].TPMisOn) && (!(tpmpresent & 0x2 ))) tpmled0 += 0x2;
+		if ((TPMcontrol[2].TPMisOn) && (!(tpmpresent & 0x4 ))) tpmled0 += 0x4;
+		if ((TPMcontrol[3].TPMisOn) && (!(tpmpresent & 0x8 ))) tpmled0 += 0x8;
+		if ((TPMcontrol[4].TPMisOn) && (!(tpmpresent & 0x10))) tpmled1 += 0x1;
+		if ((TPMcontrol[5].TPMisOn) && (!(tpmpresent & 0x20))) tpmled1 += 0x2;
+		if ((TPMcontrol[6].TPMisOn) && (!(tpmpresent & 0x40))) tpmled1 += 0x4;
+		if ((TPMcontrol[7].TPMisOn) && (!(tpmpresent & 0x80))) tpmled1 += 0x8;
 		primopasso = !primopasso;
 	}
 	
@@ -735,7 +757,7 @@ void TWIdataBlock(void){
 // 		io++;
 // 		if (io == 8) io = 0;
 		
-		TPM_present();
+		TPMpresent();
 		
 		twi_block = 0x1; // return
 	}
