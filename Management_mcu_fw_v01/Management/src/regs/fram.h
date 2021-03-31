@@ -212,5 +212,7 @@
 
 #define fram_TPM_SUPPLY_STATUS						0x000000370 //R  - 32 bit
 
+#define fram_MCU_COUNTER_ALIVE						0x000000374 //R  - 32 bit
+
 
 #endif /* FRAM_H_ */

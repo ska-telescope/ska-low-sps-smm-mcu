@@ -58,6 +58,9 @@
 // From module: ADC - Analog-to-digital Converter
 #include <adc.h>
 
+// From module: CRCCU - Cyclic Redundancy Check Calculation Unit
+#include <crccu.h>
+
 // From module: Common SAM compiler driver
 #include <compiler.h>
 #include <status_codes.h>
@@ -71,6 +74,12 @@
 // From module: Delay routines
 #include <delay.h>
 
+// From module: EEFC - Enhanced Embedded Flash Controller
+#include <efc.h>
+
+// From module: Flash - SAM Flash Service API
+#include <flash_efc.h>
+
 // From module: GPIO - General purpose Input/Output
 #include <gpio.h>
 
@@ -82,6 +91,9 @@
 
 // From module: Interrupt management - SAM implementation
 #include <interrupt.h>
+
+// From module: NVM - Non volatile memory access
+#include <common_nvm.h>
 
 // From module: PIO - Parallel Input/Output Controller
 #include <pio.h>
@@ -114,9 +126,9 @@
 
 // From module: TWI - Two-Wire Interface - SAM implementation
 #include <sam_twi/twi_master.h>
-//#include <sam_twi/twi_slave.h>
+#include <sam_twi/twi_slave.h>
 #include <twi_master.h>
-//#include <twi_slave.h>
+#include <twi_slave.h>
 
 // From module: TWI - Two-wire Interface
 #include <twi.h>

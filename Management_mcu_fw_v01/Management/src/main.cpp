@@ -32,7 +32,7 @@
 bool iMX_use_TWI = false;
 uint8_t twi_block = 0x1;
 
-const uint32_t _build_version = 0xdeb00024;
+const uint32_t _build_version = 0xdb000101;
 const uint32_t _build_date = ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -52,6 +52,8 @@ float buck2tempnorm = 0;
 uint32_t buck2temp = 0;
 uint32_t internalTemp = 0;
 uint32_t duty;
+uint32_t BootMode = 0;
+uint32_t counter_alive = 0;
 
 pwm_channel_t pwm_opts;
 
@@ -402,6 +404,10 @@ void SPIdataBlock(void){
 	XO3_Read(sam_user_gp2 + sam_offset, &duty); // 0 max - 90 slow/stop
 	if (duty > 99) duty = 99;
 	
+	XO3_Read(sam_user_gp0 + sam_offset, &BootMode);
+	
+	XO3_Write(sam_user_gp1 + sam_offset, counter_alive);
+	counter_alive++;
 }
 
 bool checkInterruptIMX6(void){
@@ -770,6 +776,9 @@ int main (void)
 	/* Insert system clock initialization code here*/
 	sysclk_init();
 	board_init();
+	
+	// Check and set the GNVM bit 1 to boot automgically from FLASH
+	if(!(flash_is_gpnvm_set(1))){ flash_set_gpnvm(1); }
 
 	SysTick_Config(F_CPU/1000);
 	uint32_t  Timeout = MS_Timer + 1000;
@@ -805,6 +814,7 @@ int main (void)
 	XO3_Write(sam_mcufw_build_version + sam_offset, _build_version);
 	XO3_Write(sam_mcufw_build_time + sam_offset, _build_time);
 	XO3_Write(sam_mcufw_build_date + sam_offset, _build_date);
+	XO3_Write(sam_user_gp0 + sam_offset, 0);
 	XO3_Write(sam_user_gp2 + sam_offset, 0x0); // Initialize fan speed to max
 	XO3_Read(regfile_sam_pooltime + regfile_offset, &pooling_time); // ms
 	Timeout = MS_Timer + pooling_time;
@@ -840,6 +850,21 @@ int main (void)
 		
 		SPIdataBlock();
 		TWIdataBlock();
+		
+		// Check if bootloader is requested
+		if (BootMode == 0xb007){
+			cpu_irq_disable();
+			uint32_t ris;
+			ris = flash_clear_gpnvm(1);
+			if (ris != 0) { XO3_Write(sam_user_gp0 + sam_offset, ris); }
+			else {
+				XO3_Write(sam_user_gp0 + sam_offset, 0x5e7); 			
+				while(1){
+					asm("nop");
+				}
+			}
+			cpu_irq_enable();
+		}
 		
 		if ((int32_t)((int32_t)MS_Timer - (int32_t)Timeout) >= 0) { //Timed execution
 			Timeout += pooling_time;  // Repeat this as pooling_time
