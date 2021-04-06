@@ -65,6 +65,15 @@ int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint
 	return (int)statusIN;
 }
 
+uint8_t twiFpgaReadExp (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd address)
+{
+	uint32_t data;
+	
+	twiFpgaWrite(ICaddress, 0, R8BIT, TwiRegister, &data, address);
+	
+	return data;
+}
+
 uint8_t twiFpgaRead8 (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd address)
 {
 	uint32_t data;

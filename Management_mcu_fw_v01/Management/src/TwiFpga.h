@@ -44,6 +44,11 @@ int twiFpgaWrite (uint8_t ICaddress,
 				   uint32_t* datarx,
 				   twiFPGAadd address
 				   );
+				   
+uint8_t twiFpgaReadExp (uint8_t ICaddress,
+				uint32_t TwiRegister,
+				twiFPGAadd address
+				);
 
 uint8_t twiFpgaRead8 (uint8_t ICaddress,
 				  uint32_t TwiRegister,

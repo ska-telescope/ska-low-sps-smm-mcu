@@ -32,7 +32,7 @@
 bool iMX_use_TWI = false;
 uint8_t twi_block = 0x1;
 
-const uint32_t _build_version = 0xdb000101;
+const uint32_t _build_version = 0xdb000102;
 const uint32_t _build_date = ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -44,6 +44,8 @@ void send_spi(uint8_t data);
 uint8_t data_buffer[BUFFERSIZE];
 uint8_t data_rx_buffer[BUFFERSIZE];
 // ----- SPI -------
+
+uint8_t managementBoardAddress = 0xEE;
 
 float voltagesnorm[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };
 uint32_t voltages[12] = { 0,0,0,0,0,0,0,0,0,0,0,0 };	
@@ -406,6 +408,8 @@ void SPIdataBlock(void){
 	
 	XO3_Read(sam_user_gp0 + sam_offset, &BootMode);
 	
+	XO3_Write(fram_MANAGEMENT_BOARD_ID + fram_offset, uint32_t(managementBoardAddress));
+	
 	XO3_Write(sam_user_gp1 + sam_offset, counter_alive);
 	counter_alive++;
 }
@@ -764,6 +768,7 @@ void TWIdataBlock(void){
 // 		if (io == 8) io = 0;
 		
 		TPMpresent();
+		managementBoardAddress = twiFpgaReadExp(0x46, 0x00, i2c4);
 		
 		twi_block = 0x1; // return
 	}
@@ -839,6 +844,9 @@ int main (void)
   	//OneWireSelectCS(TPM1OW);
 	twiFpgaWrite(0x40, 1, 2, 0xf0, &vers, i2c4);
 	twiFpgaWrite(0x42, 1, 2, 0xf0, &vers, i2c4);
+	managementBoardAddress = twiFpgaRead8(0x46, 0x00, i2c4);
+	
+	XO3_Write(fram_400 + fram_offset, 0x400);
 	
 //  	twiFpgaWrite(0x80, 3, 2, 0x00bb00, &vers, i2c2);
 //  	twiFpgaWrite(0x82, 3, 2, 0x00bb00, &vers, i2c2);

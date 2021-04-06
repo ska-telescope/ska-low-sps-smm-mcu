@@ -214,5 +214,9 @@
 
 #define fram_MCU_COUNTER_ALIVE						0x000000374 //R  - 32 bit
 
+#define fram_MANAGEMENT_BOARD_ID					0x000000378 //R  - 32 bit
+
+#define fram_400									0x000000400 //R  - 32 bit
+
 
 #endif /* FRAM_H_ */
