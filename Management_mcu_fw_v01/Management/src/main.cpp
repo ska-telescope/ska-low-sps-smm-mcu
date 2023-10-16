@@ -32,7 +32,7 @@
 bool iMX_use_TWI = false;
 uint8_t twi_block = 0x1;
 
-const uint32_t _build_version = 0xdb000102;
+const uint32_t _build_version = 0xdb000103;
 const uint32_t _build_date = ((((BUILD_YEAR_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH1 & 0xFF - 0x30)) << 24) | (((BUILD_YEAR_CH2 & 0xFF - 0x30) * 0x10 ) + ((BUILD_YEAR_CH3 & 0xFF - 0x30)) << 16) | (((BUILD_MONTH_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_MONTH_CH1 & 0xFF - 0x30)) << 8) | (((BUILD_DAY_CH0 & 0xFF - 0x30) * 0x10 ) + ((BUILD_DAY_CH1 & 0xFF - 0x30))));
 const uint32_t _build_time = (0x00 << 24 | (((__TIME__[0] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[1] & 0xFF - 0x30)) << 16) | (((__TIME__[3] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[4] & 0xFF - 0x30)) << 8) | (((__TIME__[6] & 0xFF - 0x30) * 0x10 ) + ((__TIME__[7] & 0xFF - 0x30))));
 
@@ -67,10 +67,47 @@ struct TPMstruct {
 
 struct TPMstruct TPMcontrol[8];
 
+
+
+
+
+
 volatile uint32_t MS_Timer = 0;
 void SysTick_Handler(void) {
 	MS_Timer++;                // Increment global millisecond timer
 }
+
+
+#define psu0_phy_add 0xb0
+#define psu1_phy_add 0xb1
+#define psu_reg_num 13
+uint16_t psu0_fram_offset[psu_reg_num] = {fram_PSU_0_vout,fram_PSU_0_vin,fram_PSU_0_iout,fram_PSU_0_iin,fram_PSU_0_status_vout,fram_PSU_0_status_iout,fram_PSU_0_fan_speed,fram_PSU_0_status,fram_PSU_0_temp1,fram_PSU_0_temp2,fram_PSU_0_temp3,fram_PSU_0_pout,fram_PSU_0_pin};
+uint16_t psu1_fram_offset[psu_reg_num] = {fram_PSU_1_vout,fram_PSU_1_vin,fram_PSU_1_iout,fram_PSU_1_iin,fram_PSU_1_status_vout,fram_PSU_1_status_iout,fram_PSU_1_fan_speed,fram_PSU_1_status,fram_PSU_1_temp1,fram_PSU_1_temp2,fram_PSU_1_temp3,fram_PSU_1_pout,fram_PSU_1_pin};
+uint8_t psu_reg_offset[psu_reg_num][2]  = {{0x8b,2},{0x88,2},{0x8c,2},{0x89,2},{0x7a,1},{0x7b,1},{0x90,2},{0x79,2},{0x8d,2},{0x8e,2},{0x8f,2},{0x96,2},{0x97,2}};	
+
+
+
+void psu_fram_regs_update(uint8_t psu_index)
+{
+	int status;	
+	uint32_t retvalue = 0xffffffff;
+	int i=0;
+	for (i=0;i<psu_reg_num;i++)
+	{
+		retvalue = 0xffffffff;
+		if(psu_index==0)
+		{
+			status = twiFpgaWrite(psu0_phy_add, 1, psu_reg_offset[i][1], psu_reg_offset[i][0], &retvalue, i2c3); 
+			XO3_Write(uint32_t(psu0_fram_offset[i] + fram_offset), retvalue);		
+		}
+		else
+		{
+			status = twiFpgaWrite(psu1_phy_add, 1, psu_reg_offset[i][1], psu_reg_offset[i][0], &retvalue, i2c3); 
+			XO3_Write(uint32_t(psu1_fram_offset[i] + fram_offset), retvalue);
+		}
+	}
+}
+
 
 void fan_setup(void){
 	uint32_t retvalue;
@@ -443,8 +480,7 @@ void TWIdataBlock(void){
 		retvalue = 0xffffffff;
 		status = twiFpgaWrite(0x32, 1, 2, 0x05, &retvalue, i2c1); //temp_value 0x32
 		XO3_Write(fram_ADT7408_M_2_temp_val + fram_offset, retvalue);	
-		retvalue = 0xffffffff;
-		
+		retvalue = 0xffffffff;	
 		status = twiFpgaWrite(0x88, 1, 1, 0x04, &retvalue, i2c1); //fault_log 0x88
 		XO3_Write(fram_LTC4281_M_fault_log + fram_offset, retvalue);
 		retvalue = 0xffffffff;
@@ -705,54 +741,72 @@ void TWIdataBlock(void){
 	}
 		
 	if ((checkInterruptIMX6() == false) && (twi_block == 0x3)) { // All right, TWI free. Read TWI regs and call XO3_WriteByte to write regs on FPGA	
+		uint8_t psindex=0;
 		XO3_Write(sam_user_gp3 + sam_offset, 0x12C30000);
+		for(psindex=0;psindex<2;psindex++)
+		{
+			psu_fram_regs_update(psindex);
+		}
 		
-		// TWI3 - Power Supply		
-		status = twiFpgaWrite(0xB0, 1, 2, 0x8b, &retvalue, i2c3);
-		//voltage = uint16_t(retvalue) * pow(2,-9);
-		XO3_Write(fram_PSU_0_vout + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB0, 1, 2, 0x8c, &retvalue, i2c3);
-		XO3_Write(fram_PSU_0_iout + fram_offset, retvalue);
-		//amperage = (uint16_t(retvalue) & 0x7ff) * pow(2,-3);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB0, 1, 2, 0x96, &retvalue, i2c3);
+		
+		
+		
+		//// TWI3 - Power Supply		
+		//status = twiFpgaWrite(0xB0, 1, 2, 0x8b, &retvalue, i2c3);
+		////voltage = uint16_t(retvalue) * pow(2,-9);
 		//XO3_Write(fram_PSU_0_vout + fram_offset, retvalue);
-		//power = (uint16_t(retvalue) & 0x7ff) * 2;
-		//powerc = amperage * voltage;
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB0, 1, 1, 0x7A, &retvalue, i2c3);
-		XO3_Write(fram_PSU_0_status_vout + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB0, 1, 1, 0x7B, &retvalue, i2c3);
-		XO3_Write(fram_PSU_0_status_iout + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB0, 1, 2, 0x90, &retvalue, i2c3);
-		XO3_Write(fram_PSU_0_fan_speed + fram_offset, retvalue);
-		retvalue = 0xffffffff;	
-			
-		status = twiFpgaWrite(0xB2, 1, 2, 0x8b, &retvalue, i2c3);
-		//voltage = uint16_t(retvalue) * pow(2,-9);
-		XO3_Write(fram_PSU_1_vout + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB2, 1, 2, 0x8c, &retvalue, i2c3);
-		XO3_Write(fram_PSU_1_iout + fram_offset, retvalue);
-		//amperage = (uint16_t(retvalue) & 0x7ff) * pow(2,-3);
-		status = twiFpgaWrite(0xB2, 1, 2, 0x96, &retvalue, i2c3);
-		retvalue = 0xffffffff;
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB0, 1, 2, 0x8c, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_0_iout + fram_offset, retvalue);
+		////amperage = (uint16_t(retvalue) & 0x7ff) * pow(2,-3);
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB0, 1, 2, 0x96, &retvalue, i2c3);
+		////XO3_Write(fram_PSU_0_vout + fram_offset, retvalue);
+		////power = (uint16_t(retvalue) & 0x7ff) * 2;
+		////powerc = amperage * voltage;
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB0, 1, 1, 0x7A, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_0_status_vout + fram_offset, retvalue);
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB0, 1, 1, 0x7B, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_0_status_iout + fram_offset, retvalue);
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB0, 1, 2, 0x90, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_0_fan_speed + fram_offset, retvalue);
+		//retvalue = 0xffffffff;	
+			//
+		//status = twiFpgaWrite(0xB2, 1, 2, 0x8b, &retvalue, i2c3);
+		////voltage = uint16_t(retvalue) * pow(2,-9);
 		//XO3_Write(fram_PSU_1_vout + fram_offset, retvalue);
-		//power = (uint16_t(retvalue) & 0x7ff) * 2;
-		//powerc = amperage * voltage;
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB2, 1, 1, 0x7A, &retvalue, i2c3);
-		XO3_Write(fram_PSU_1_status_vout + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB2, 1, 1, 0x7B, &retvalue, i2c3);
-		XO3_Write(fram_PSU_1_status_iout + fram_offset, retvalue);
-		retvalue = 0xffffffff;
-		status = twiFpgaWrite(0xB2, 1, 2, 0x90, &retvalue, i2c3);
-		XO3_Write(fram_PSU_1_fan_speed + fram_offset, retvalue);
-		retvalue = 0xffffffff;
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB2, 1, 2, 0x8c, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_1_iout + fram_offset, retvalue);
+		////amperage = (uint16_t(retvalue) & 0x7ff) * pow(2,-3);
+		//status = twiFpgaWrite(0xB2, 1, 2, 0x96, &retvalue, i2c3);
+		//retvalue = 0xffffffff;
+		////XO3_Write(fram_PSU_1_vout + fram_offset, retvalue);
+		////power = (uint16_t(retvalue) & 0x7ff) * 2;
+		////powerc = amperage * voltage;
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB2, 1, 1, 0x7A, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_1_status_vout + fram_offset, retvalue);
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB2, 1, 1, 0x7B, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_1_status_iout + fram_offset, retvalue);
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB2, 1, 2, 0x90, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_1_fan_speed + fram_offset, retvalue);
+		//retvalue = 0xffffffff;
+		//
+		//
+		//retvalue = 0xffffffff;
+		//status = twiFpgaWrite(0xB2, 1, 2, 0x90, &retvalue, i2c3);
+		//XO3_Write(fram_PSU_1_fan_speed + fram_offset, retvalue);
+		
+		
+		
+		
+		
 		
 		
 		twi_block = 0x4; // return
