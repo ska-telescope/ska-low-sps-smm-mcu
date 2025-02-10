@@ -7,7 +7,7 @@
 
 #include <TwiFpga.h>
 #include <SpiRouter.h>
-#include <asf.h>
+
 #include "FPGA_RegFiles.h"
 
 int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint32_t datatx, uint32_t* datarx, twiFPGAadd address)
@@ -20,11 +20,11 @@ int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint
 	
 	ICaddress = ICaddress >> 1; // Shift 8bit to 7bit address
 	
-	if ((byte2write > 1) || (address != i2c3)) { // Chiedere ad ale di invertire le scritture
-		tempbyte0 = uint8_t(datatx);
-		tempbyte1 = uint8_t(datatx >> 8);
-		tempbyte2 = uint8_t(datatx >> 16);
-		tempbyte3 = uint8_t(datatx >> 24);
+	if ((byte2write > 1) && (address != i2c3)) { // Chiedere ad ale di invertire le scritture
+		tempbyte0 = (uint8_t)datatx;
+		tempbyte1 = (uint8_t)(datatx >> 8);
+		tempbyte2 = (uint8_t)(datatx >> 16);
+		tempbyte3 = (uint8_t)(datatx >> 24);
 		datatx = 0x0;
 		
 		if (byte2write == 2) datatx = ((tempbyte0 << 8 ) + tempbyte1);
@@ -32,27 +32,28 @@ int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint
 		if (byte2write == 4) datatx = ((tempbyte0 << 24) + (tempbyte1 << 16) + (tempbyte2 << 8) + tempbyte3);
 	}
 	
-	twi_ctrl_data += (byte2read << 24); // [31:24] byte number to read
-	twi_ctrl_data += (byte2write << 16); // [23:16] byte number to write
+	twi_ctrl_data += (address << 16); // [9:0] command - [9:8] FPGA router TWI address
+	twi_ctrl_data += (byte2read << 12); // [31:24] byte number to read
+	twi_ctrl_data += (byte2write << 8); // [23:16] byte number to write
 	twi_ctrl_data += (ICaddress); // [9:0] command - [6:0] IC address
-	twi_ctrl_data += address; // [9:0] command - [9:8] FPGA router TWI address
 	
-	XO3_WriteByte(twi_offset + twi_wrdata, datatx);
-	XO3_WriteByte(twi_offset + twi_command, twi_ctrl_data);
+	
+	XO3_Write(i2c_transmit, datatx);
+	XO3_Write(i2c_command, twi_ctrl_data);
 	for (int i = 0; i < 0xffff; i++) asm("nop");
-    XO3_Read(twi_offset + twi_status, &statusIN);
+    XO3_Read(i2c_status, &statusIN);
 	while (statusIN == (0x1 || 0x3)) {
 		busyRetry++;
-		if (busyRetry >= MAX_BUSY_RETRY) return int(statusIN);
-		XO3_Read(twi_offset + twi_status, &statusIN);
+		if (busyRetry >= MAX_BUSY_RETRY) return (int)statusIN;
+		XO3_Read(i2c_status, &statusIN);
 	}
-	XO3_Read(twi_offset + tiw_rdata, &dataIN);
+	XO3_Read(i2c_receive, &dataIN);
 	
-	if ((byte2write > 1) || (address != i2c3)) { // Chiedere ad ale di invertire le letture
-		tempbyte0 = uint8_t(dataIN);
-		tempbyte1 = uint8_t(dataIN >> 8);
-		tempbyte2 = uint8_t(dataIN >> 16);
-		tempbyte3 = uint8_t(dataIN >> 24);
+	if ((byte2read > 1) && (address != i2c3)) { // Chiedere ad ale di invertire le letture
+		tempbyte0 = dataIN;
+		tempbyte1 = dataIN >> 8;
+		tempbyte2 = dataIN >> 16;
+		tempbyte3 = dataIN >> 24;
 		dataIN = 0x0;
 		
 		if (byte2read == 2) dataIN = ((tempbyte0 << 8 ) + tempbyte1);
@@ -61,12 +62,20 @@ int twiFpgaWrite (uint8_t ICaddress, uint8_t byte2write, uint8_t byte2read, uint
 	}
 	
 	*datarx = dataIN;
-	return int(statusIN);
+	return (int)statusIN;
+}
+
+uint8_t twiFpgaReadExp (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd address)
+{
+	uint32_t data;
+	
+	twiFpgaWrite(ICaddress, 0, R8BIT, TwiRegister, &data, address);
+	
+	return data;
 }
 
 uint8_t twiFpgaRead8 (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd address)
 {
-	int status;
 	uint32_t data;
 		
 	twiFpgaWrite(ICaddress, R8BIT, R8BIT, TwiRegister, &data, address);
@@ -76,7 +85,6 @@ uint8_t twiFpgaRead8 (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd addres
 
 uint16_t twiFpgaRead16 (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd address)
 {
-	int status;
 	uint32_t data;
 	
 	twiFpgaWrite(ICaddress, R16BIT, R16BIT, TwiRegister, &data, address);
@@ -86,7 +94,6 @@ uint16_t twiFpgaRead16 (uint8_t ICaddress, uint32_t TwiRegister, twiFPGAadd addr
 
 uint8_t twiFpgaWrite8 (uint8_t ICaddress, uint8_t dataOut, uint32_t TwiRegister, twiFPGAadd address)
 {
-	int status;
 	uint32_t data;
 	
 	TwiRegister = (TwiRegister << 8) + dataOut;
@@ -98,7 +105,6 @@ uint8_t twiFpgaWrite8 (uint8_t ICaddress, uint8_t dataOut, uint32_t TwiRegister,
 
 uint16_t twiFpgaWrite16 (uint8_t ICaddress, uint16_t dataOut, uint32_t TwiRegister, twiFPGAadd address)
 {
-	int status;
 	uint32_t data;
 	
 	TwiRegister = (TwiRegister << 16) + dataOut;

@@ -33,7 +33,7 @@ XO3_Write(
 );*/
 
 void
-XO3_WriteByte(
+XO3_Write(
     uint32_t offset,
     uint32_t value
 );

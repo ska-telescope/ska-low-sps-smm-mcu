@@ -202,6 +202,42 @@
 #define fram_PSU_1_status_iout						0x000000354 //R  - 8 bit
 #define fram_PSU_1_fan_speed						0x000000358 //R  - 16 bit
 
+#define fram_PSU_0_status							0x000000384 //R  - 16 bit
+#define fram_PSU_0_temp1							0x000000388 //R  - 16 bit
+#define fram_PSU_0_temp2							0x00000038c //R  - 16 bit
+#define fram_PSU_0_temp3							0x000000390 //R  - 16 bit
+#define fram_PSU_0_pout								0x000000394 //R  - 16 bit
+#define fram_PSU_0_pin								0x000000398 //R  - 16 bit
+
+#define fram_PSU_1_status							0x00000039c //R  - 16 bit
+#define fram_PSU_1_temp1							0x0000003a0 //R  - 16 bit
+#define fram_PSU_1_temp2							0x0000003a4 //R  - 16 bit
+#define fram_PSU_1_temp3							0x0000003a8 //R  - 16 bit
+#define fram_PSU_1_pout								0x0000003ac //R  - 16 bit
+#define fram_PSU_1_pin								0x0000003b0 //R  - 16 bit
+
+#define fram_PSU_ioexp_pre							0x0000003b4
+#define fram_PSU_ioexp_post							0x0000003b8
+
+
+
+
+
+// i2c2
+#define fram_FAN_PWM								0x00000035C //RW - 8 bit
+#define fram_FAN1_TACH								0x000000360 //R  - 32 bit
+#define fram_FAN2_TACH								0x000000364 //R  - 32 bit
+#define fram_FAN3_TACH								0x000000368 //R  - 32 bit
+#define fram_FAN4_TACH								0x00000036C //R  - 32 bit
+
+
+#define fram_TPM_SUPPLY_STATUS						0x000000370 //R  - 32 bit
+
+#define fram_MCU_COUNTER_ALIVE						0x000000374 //R  - 32 bit
+
+#define fram_MANAGEMENT_BOARD_ID					0x000000378 //R  - 32 bit
+
+#define fram_400									0x000000400 //R  - 32 bit
 
 
 #endif /* FRAM_H_ */

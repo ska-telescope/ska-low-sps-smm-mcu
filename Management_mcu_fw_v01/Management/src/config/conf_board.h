@@ -98,7 +98,7 @@
 #define I2C1_SCL_FLAGS (PIO_PERIPH_A | PIO_DEFAULT)
 
 // ---------- GPIO ----------
-#define XO3_REFRESH PIO_PA6_IDX
+#define XO3_REFRESH PIO_PC6_IDX
 
 #define PIN_LEDK7 PIO_PA24_IDX
 #define PIN_LEDK8 PIO_PA25_IDX
@@ -133,10 +133,10 @@
 #define SPI_SPCK_FLAGS       (PIO_PERIPH_A | PIO_PULLUP)
 
 /** SPI chip select 0 pin definition. (Only one configuration is possible) */
-#define SPI_NPCS0_GPIO         (PIO_PA11_IDX)
+#define SPI_NPCS0_GPIO         (PIO_PA11_IDX) // SS0 - CPLD
 #define SPI_NPCS0_FLAGS           (PIO_PERIPH_A | PIO_DEFAULT)
 
-#define SPI_NPCS1_GPIO PIO_PA31_IDX
+#define SPI_NPCS1_GPIO PIO_PA31_IDX // SS1 - EEPROM ?
 #define SPI_NPCS2_GPIO PIO_PA30_IDX
 
 /*#define PIN_ECSPI_MISO				(PIO_PA12_IDX)

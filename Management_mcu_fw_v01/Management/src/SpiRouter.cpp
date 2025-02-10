@@ -17,6 +17,7 @@
 
 #include <memory.h>
 #include <string.h>
+#include <stdlib.h>
 
 #include <SpiRouter.h>
 #include <asf.h>
@@ -47,6 +48,7 @@ SPI_sync(
 	uint32_t  offset        = 0;
 	bool      last          = true;
 	bool      little_endian = true;
+	static const int latency = 1;
 
 	void* buffer = nullptr;
 	void* rxbuffer = nullptr;
@@ -129,7 +131,9 @@ SPI_sync(
 		spi_transceive_packet(MYSPI, tmp, rxbuf, _count);
 		spi_deselect_device(MYSPI, &device); // Deselect Device and pullup CS
 		
-		memcpy(rxBuffer, &rxbuf[offset], length);
+		
+		
+		memcpy(rxBuffer, &rxbuf[offset+latency], length);
 		if (!little_endian) {
 			uint16_t* ptr = (uint16_t*)rxBuffer;
 
@@ -157,8 +161,8 @@ XO3_Write(
     void*    privateData
 )*/
 void
-XO3_WriteByte(
-    uint32_t offset,
+XO3_Write(
+    uint32_t regs,
     uint32_t value
 )
 {
@@ -168,16 +172,16 @@ XO3_WriteByte(
 	memset(txBuffer, 0, 8);
 
 	txBuffer[0] = 0x01;
-	//txBuffer[1] = 0xFF & (offset >> 24);
-	txBuffer[1] = 0xFF & (offset >> 16);
-	txBuffer[2] = 0xFF & (offset >> 8);
-	txBuffer[3] = 0xFF & (offset);
-	txBuffer[4] = 0xFF & (value >> 24);
-	txBuffer[5] = 0xFF & (value >> 16);
-	txBuffer[6] = 0xFF & (value >> 8);
-	txBuffer[7] = 0xFF & (value);
+	txBuffer[1] = 0xFF & (regs >> 24);
+	txBuffer[2] = 0xFF & (regs >> 16);
+	txBuffer[3] = 0xFF & (regs >> 8);
+	txBuffer[4] = 0xFF & (regs);
+	txBuffer[5] = 0xFF & (value >> 24);
+	txBuffer[6] = 0xFF & (value >> 16);
+	txBuffer[7] = 0xFF & (value >> 8);
+	txBuffer[8] = 0xFF & (value);
 
-  int success = SPI_sync(1, txBuffer, rxBuffer, 10);
+  int success = SPI_sync(1, txBuffer, rxBuffer, 9);
 } // XO3_Write
 /*
 int
@@ -189,7 +193,7 @@ XO3_Read(
 )*/
 int
 XO3_Read(
-    uint32_t  offset,
+    uint32_t  regs,
     uint32_t* value
 )
 {
@@ -199,10 +203,10 @@ XO3_Read(
   memset(txBuffer, 0, 8);
 
   txBuffer[0] = 0x03;
-  //txBuffer[1] = 0xFF & (offset >> 24);
-  txBuffer[1] = 0xFF & (offset >> 16);
-  txBuffer[2] = 0xFF & (offset >> 8);
-  txBuffer[3] = 0xFF & (offset);
+  txBuffer[1] = 0xFF & (regs >> 24);
+  txBuffer[2] = 0xFF & (regs >> 16);
+  txBuffer[3] = 0xFF & (regs >> 8);
+  txBuffer[4] = 0xFF & (regs);
 
   int success = SPI_sync(1, txBuffer, rxBuffer, 10);
 
@@ -212,6 +216,45 @@ XO3_Read(
   *value=dato;
   return success;
 } // XO3_Read
+
+int
+XO3_BitfieldExtract(
+	uint32_t RegBA,
+	uint32_t RegMask,
+	uint32_t shift,
+	uint32_t* value
+)
+{
+	int success;
+	uint32_t tmp = 0;	
+	
+	success = XO3_Read(RegBA, &tmp);	
+	tmp = (tmp & RegMask) >> shift;
+	
+	*value = tmp;
+	
+	return success;
+}
+
+int
+XO3_BitfieldRMWrite(
+uint32_t RegBA,
+uint32_t RegMask,
+uint32_t shift,
+uint32_t value
+)
+{
+	int success;
+	uint32_t tmp;
+	
+	success = XO3_Read(RegBA, &tmp);
+	tmp &= ~RegMask;
+	tmp += (value << shift);
+		
+	XO3_Write(RegBA, tmp);
+	
+	return success;
+}
 
 /*
 int

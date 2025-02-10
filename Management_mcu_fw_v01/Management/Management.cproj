@@ -41,13 +41,16 @@
           <option id="sam.drivers.adc" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.dacc" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.pmc" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="sam.drivers.pwm" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.rtc" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.spi" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.tc" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.tc.appnote" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.twi" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.drivers.wdt" value="Add" config="" content-id="Atmel.ASF" />
-          <option id="sam.drivers.pwm" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="sam.drivers.efc" value="Add" config="" content-id="Atmel.ASF" />
+          <option id="common.drivers.nvm" value="Add" config="no_extmem" content-id="Atmel.ASF" />
+          <option id="sam.drivers.crccu" value="Add" config="" content-id="Atmel.ASF" />
           <option id="sam.utils.linker_scripts#atsam4s8" value="Add" config="" content-id="Atmel.ASF" />
         </options>
         <configurations>
@@ -238,11 +241,20 @@
           <file path="src/ASF/sam/drivers/wdt/wdt.c" framework="" version="3.35.1" source="sam\drivers\wdt\wdt.c" changed="False" content-id="Atmel.ASF" />
           <file path="src/ASF/sam/drivers/pwm/pwm.h" framework="" version="3.35.1" source="sam\drivers\pwm\pwm.h" changed="False" content-id="Atmel.ASF" />
           <file path="src/ASF/sam/drivers/pwm/pwm.c" framework="" version="3.35.1" source="sam\drivers\pwm\pwm.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/crccu/crccu.h" framework="" version="3.39.0" source="sam\drivers\crccu\crccu.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/efc/efc.c" framework="" version="3.39.0" source="sam\drivers\efc\efc.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/efc/efc.h" framework="" version="3.39.0" source="sam\drivers\efc\efc.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/services/flash_efc/flash_efc.c" framework="" version="3.39.0" source="sam\services\flash_efc\flash_efc.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/services/flash_efc/flash_efc.h" framework="" version="3.39.0" source="sam\services\flash_efc\flash_efc.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/drivers/nvm/sam/sam_nvm.c" framework="" version="3.39.0" source="common\drivers\nvm\sam\sam_nvm.c" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/common/drivers/nvm/common_nvm.h" framework="" version="3.39.0" source="common\drivers\nvm\common_nvm.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/Config/conf_nvm.h" framework="" version="3.39.0" source="common\drivers\nvm\sam\module_config\conf_nvm.h" changed="False" content-id="Atmel.ASF" />
+          <file path="src/ASF/sam/drivers/crccu/crccu.c" framework="" version="3.39.0" source="sam\drivers\crccu\crccu.c" changed="False" content-id="Atmel.ASF" />
         </files>
         <documentation help="http://asf.atmel.com/docs/3.35.1/common.applications.user_application.user_board.sam4s/html/index.html" />
         <offline-documentation help="" />
         <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.37" />
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.42.0" />
         </dependencies>
         <project id="common.applications.user_application.user_board.sam4s" value="Add" config="" content-id="Atmel.ASF" />
         <board id="board.user_board.sam4s" value="Add" config="" content-id="Atmel.ASF" />
@@ -264,7 +276,7 @@
       </ToolNumber>
       <ToolName>Custom Programming Tool</ToolName>
     </custom>
-    <avrtoolinterface>JTAG</avrtoolinterface>
+    <avrtoolinterface>SWD</avrtoolinterface>
     <com_atmel_avrdbg_tool_edbg>
       <ToolOptions>
         <InterfaceProperties>
@@ -292,7 +304,7 @@
           <JtagDaisyChainDevices>
           </JtagDaisyChainDevices>
         </InterfaceProperties>
-        <InterfaceName>JTAG</InterfaceName>
+        <InterfaceName>SWD</InterfaceName>
         <JlinkConfigFile>F:\SanitasEG\GIT\SKA\MANAGEMENT_MCU_FW\Management_mcu_fw_v01\Management\jlink.config</JlinkConfigFile>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.samice</ToolType>
@@ -350,6 +362,10 @@
             <Value>../src/ASF/sam/drivers/spi</Value>
             <Value>../src/ASF/sam/drivers/wdt</Value>
             <Value>../src/ASF/sam/drivers/pwm</Value>
+            <Value>../src/ASF/sam/drivers/crccu</Value>
+            <Value>../src/ASF/sam/drivers/efc</Value>
+            <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>../src/ASF/common/drivers/nvm</Value>
           </ListValues>
         </armgcc.compiler.directories.IncludePaths>
         <armgcc.compiler.optimization.level>Optimize for size (-Os)</armgcc.compiler.optimization.level>
@@ -361,18 +377,33 @@
           <ListValues>
             <Value>../src/ASF/sam/drivers/wdt</Value>
             <Value>../src/ASF/sam/drivers/pwm</Value>
+            <Value>../src/ASF/sam/drivers/crccu</Value>
+            <Value>../src/ASF/sam/drivers/efc</Value>
+            <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>../src/Config</Value>
+            <Value>../src/ASF/common/drivers/nvm</Value>
           </ListValues>
         </armgcccpp.compiler.directories.IncludePaths>
         <armgcccpp.assembler.general.IncludePaths>
           <ListValues>
             <Value>../src/ASF/sam/drivers/wdt</Value>
             <Value>../src/ASF/sam/drivers/pwm</Value>
+            <Value>../src/ASF/sam/drivers/crccu</Value>
+            <Value>../src/ASF/sam/drivers/efc</Value>
+            <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>../src/Config</Value>
+            <Value>../src/ASF/common/drivers/nvm</Value>
           </ListValues>
         </armgcccpp.assembler.general.IncludePaths>
         <armgcccpp.preprocessingassembler.general.IncludePaths>
           <ListValues>
             <Value>../src/ASF/sam/drivers/wdt</Value>
             <Value>../src/ASF/sam/drivers/pwm</Value>
+            <Value>../src/ASF/sam/drivers/crccu</Value>
+            <Value>../src/ASF/sam/drivers/efc</Value>
+            <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>../src/Config</Value>
+            <Value>../src/ASF/common/drivers/nvm</Value>
           </ListValues>
         </armgcccpp.preprocessingassembler.general.IncludePaths>
       </ArmGccCpp>
@@ -427,6 +458,10 @@
             <Value>../src/ASF/sam/drivers/wdt</Value>
             <Value>../src/regs</Value>
             <Value>../src/ASF/sam/drivers/pwm</Value>
+            <Value>../src/ASF/sam/drivers/crccu</Value>
+            <Value>../src/ASF/sam/drivers/efc</Value>
+            <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>../src/ASF/common/drivers/nvm</Value>
           </ListValues>
         </armgcc.compiler.directories.IncludePaths>
         <armgcc.compiler.optimization.OtherFlags>-fdata-sections</armgcc.compiler.optimization.OtherFlags>
@@ -475,6 +510,10 @@
             <Value>../src/ASF/sam/drivers/wdt</Value>
             <Value>../src/regs</Value>
             <Value>../src/ASF/sam/drivers/pwm</Value>
+            <Value>../src/ASF/sam/drivers/crccu</Value>
+            <Value>../src/ASF/sam/drivers/efc</Value>
+            <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>../src/ASF/common/drivers/nvm</Value>
           </ListValues>
         </armgcccpp.compiler.directories.IncludePaths>
         <armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>True</armgcccpp.compiler.optimization.PrepareFunctionsForGarbageCollection>
@@ -488,12 +527,22 @@
           <ListValues>
             <Value>../src/ASF/sam/drivers/wdt</Value>
             <Value>../src/ASF/sam/drivers/pwm</Value>
+            <Value>../src/ASF/sam/drivers/crccu</Value>
+            <Value>../src/ASF/sam/drivers/efc</Value>
+            <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>../src/Config</Value>
+            <Value>../src/ASF/common/drivers/nvm</Value>
           </ListValues>
         </armgcccpp.assembler.general.IncludePaths>
         <armgcccpp.preprocessingassembler.general.IncludePaths>
           <ListValues>
             <Value>../src/ASF/sam/drivers/wdt</Value>
             <Value>../src/ASF/sam/drivers/pwm</Value>
+            <Value>../src/ASF/sam/drivers/crccu</Value>
+            <Value>../src/ASF/sam/drivers/efc</Value>
+            <Value>../src/ASF/sam/services/flash_efc</Value>
+            <Value>../src/Config</Value>
+            <Value>../src/ASF/common/drivers/nvm</Value>
           </ListValues>
         </armgcccpp.preprocessingassembler.general.IncludePaths>
         <armgcccpp.preprocessingassembler.debugging.DebugLevel>Default (-Wa,-g)</armgcccpp.preprocessingassembler.debugging.DebugLevel>
@@ -506,6 +555,9 @@
     <Folder Include="src\ASF\common\" />
     <Folder Include="src\ASF\common\boards\" />
     <Folder Include="src\ASF\common\boards\user_board\" />
+    <Folder Include="src\ASF\common\drivers\" />
+    <Folder Include="src\ASF\common\drivers\nvm\" />
+    <Folder Include="src\ASF\common\drivers\nvm\sam\" />
     <Folder Include="src\ASF\common\services\" />
     <Folder Include="src\ASF\common\services\clock\" />
     <Folder Include="src\ASF\common\services\clock\sam4s\" />
@@ -526,7 +578,9 @@
     <Folder Include="src\ASF\sam\drivers\acc\" />
     <Folder Include="src\ASF\sam\drivers\acc\acc_example\" />
     <Folder Include="src\ASF\sam\drivers\adc\" />
+    <Folder Include="src\ASF\sam\drivers\crccu\" />
     <Folder Include="src\ASF\sam\drivers\dacc\" />
+    <Folder Include="src\ASF\sam\drivers\efc\" />
     <Folder Include="src\ASF\sam\drivers\pio\" />
     <Folder Include="src\ASF\sam\drivers\pmc\" />
     <Folder Include="src\ASF\sam\drivers\pwm\" />
@@ -536,6 +590,8 @@
     <Folder Include="src\ASF\sam\drivers\tc\tc_capture_waveform_example\" />
     <Folder Include="src\ASF\sam\drivers\twi\" />
     <Folder Include="src\ASF\sam\drivers\wdt\" />
+    <Folder Include="src\ASF\sam\services\" />
+    <Folder Include="src\ASF\sam\services\flash_efc\" />
     <Folder Include="src\ASF\sam\utils\" />
     <Folder Include="src\ASF\sam\utils\cmsis\" />
     <Folder Include="src\ASF\sam\utils\cmsis\sam4s\" />
@@ -565,19 +621,55 @@
     <Folder Include="src\regs\" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\ASF\common\drivers\nvm\common_nvm.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\common\drivers\nvm\sam\sam_nvm.c">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\ASF\common\services\spi\sam_spi\spi_master.c">
       <SubType>compile</SubType>
     </Compile>
+    <None Include="src\ASF\sam\drivers\crccu\crccu.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\sam\drivers\crccu\crccu.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\ASF\sam\drivers\efc\efc.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\drivers\efc\efc.h">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\ASF\sam\services\flash_efc\flash_efc.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <None Include="src\ASF\sam\services\flash_efc\flash_efc.h">
+      <SubType>compile</SubType>
+    </None>
+    <None Include="src\config\conf_nvm.h">
+      <SubType>compile</SubType>
+    </None>
     <Compile Include="src\libs\ADT7408.cpp">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\libs\ADT7408.h">
       <SubType>compile</SubType>
     </Compile>
+    <None Include="src\OneWire.cpp">
+      <SubType>compile</SubType>
+    </None>
+    <Compile Include="src\OneWire.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="src\regs\FPGA_RegFiles.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\regs\fram.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="src\regs\onewire_reg.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\TwiFpga.cpp">
@@ -622,7 +714,7 @@
     <Compile Include="src\regs\mdio.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="src\regs\onewire.h">
+    <Compile Include="src\regs\singlewire.h">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="src\regs\regfile.h">
